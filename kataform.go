@@ -37,6 +37,8 @@ func mainrun() {
 	// gi.Render2DTrace = true
 	// gi.Layout2DTrace = true
 	// ki.SignalTrace = true
+rec := ki.Node{}          // receiver for events
+	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
 
 	win := gi.NewWindow2D("gogi-widgets-demo", "Kataform", width, height, true) // true = pixel sizes
 
@@ -88,7 +90,22 @@ func mainrun() {
 	welcome := trow.AddNewChild(gi.KiT_Label, "welcome").(*gi.Label)
 	welcome.Text = "Welcome to Kataform. This is a dev only release, Kataform 0.00"
 	welcome.SetProp("align-horiz", gi.AlignCenter)
-
+	trow.AddNewChild(gi.KiT_Space, "spc1")
+	appsText := trow.AddNewChild(gi.KiT_Label, "appsText").(*gi.Label)
+	appsText.Text ="Apps"
+	appsText.SetProp("font-size", "x-large")
+		appsText.SetProp("align-horiz", gi.AlignCenter)
+	openPlanner := trow.AddNewChild(gi.KiT_Button, "openPlanner").(*gi.Button)
+	openPlanner.Text = "Planner"
+	openPlanner.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		//fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
+		if sig == int64(gi.ButtonClicked) { // note: 3 diff ButtonSig sig's possible -- important to check
+			// vp.Win.Quit()
+		
+		
+		
+		}
+	})
 	vp.UpdateEndNoSig(updt)
 
 	win.StartEventLoop()
@@ -96,3 +113,4 @@ func mainrun() {
 	// note: never gets here..
 	fmt.Printf("ending\n")
 }
+
