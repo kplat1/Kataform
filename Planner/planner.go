@@ -141,7 +141,7 @@ func mainrun() {
 	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
 	title.Text =
 		`<b>Planner</b>`
-	title.SetProp("align-horiz", gi.AlignCenter)
+	title.SetProp("text-align", gi.AlignCenter)
 	title.SetProp("align-vert", gi.AlignTop)
 	title.SetProp("font-family", "Times New Roman, serif")
 	title.SetProp("font-size", "x-large")
@@ -151,12 +151,12 @@ func mainrun() {
 
 	p1 := trow.AddNewChild(gi.KiT_Label, "p1").(*gi.Label)
 	p1.Text = "<b>Planner</b>, based on the <b>7 habits of highly effective people</b>, using <b>weekly planning</b>, and <b>habit 3</b>"
-	p1.SetProp("align-horiz", gi.AlignCenter)
+	p1.SetProp("text-align", gi.AlignCenter)
 
 	///
 	motivationText := trow.AddNewChild(gi.KiT_Label, "motivationText").(*gi.Label)
 	motivationText.Text = "<b>Create Q2 goals for each of your roles! Make sure to do this weekly</b>"
-	motivationText.SetProp("align-horiz", gi.AlignCenter)
+	motivationText.SetProp("text-align", gi.AlignCenter)
 
 	buttonStartResult := trow.AddNewChild(gi.KiT_Label, "buttonStartResult").(*gi.Label)
 	buttonStartResult.Text = "<b>Add new goal:</b>"
@@ -199,7 +199,7 @@ func mainrun() {
 		if sig == int64(gi.ButtonClicked) {
 			lt := LoadPlannerTable()
 
-			giv.TableViewDialog(vp, &lt, nil, "Login Table", "", nil, nil, nil, nil)
+			giv.TableViewDialog(vp, &lt, giv.DlgOpts{Title: "Login Table"}, nil, nil, nil)
 		}
 	})
 
@@ -208,7 +208,7 @@ func mainrun() {
 	addlogin.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
 			rec := PlannerRec{}
-			giv.StructViewDialog(vp, &rec, nil, "Enter Login Info", "", nil, recv, func(recv, send ki.Ki, sig int64, data interface{}) {
+			giv.StructViewDialog(vp, &rec, giv.DlgOpts{Title: "Enter Login Info"}, recv, func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.DialogAccepted) {
 					SaveNewLogin(&rec)
 				}
@@ -220,7 +220,7 @@ func mainrun() {
 	quit.SetText("Quit")
 	quit.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			gi.PromptDialog(vp, "Quit", "Quit: Are You Sure?", true, true, nil, recv, func(recv, send ki.Ki, sig int64, data interface{}) {
+			gi.PromptDialog(vp, gi.DlgOpts{Title: "Quit", Prompt: "Quit: Are You Sure?"}, true, true, recv, func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.DialogAccepted) {
 					PlannerDB.Close()
 					oswin.TheApp.Quit()
