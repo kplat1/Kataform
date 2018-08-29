@@ -216,6 +216,9 @@ func mainrun() {
 	sv.Viewport = vp
 
 	split.SetSplits(.5, .5)
+
+	ThePlan = make(PlannerTable, 0, 1000)
+
 	tv.SetSlice(&ThePlan, nil)
 
 	tv.WidgetSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
