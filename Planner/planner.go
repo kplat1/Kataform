@@ -203,7 +203,7 @@ func mainrun() {
 	trow.SetStretchMaxWidth()
 
 	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
-	title.Text = `<b>Planner</b>, based on the <b>7 habits of highly effective people</b>, using <b>weekly planning</b>, and <b>habit 3</b>"`
+	title.Text = `<b>Planner</b>, based on the <b>7 habits of highly effective people</b>, using <b>weekly planning</b>, and <b>habit 3</b>`
 	title.SetProp("text-align", gi.AlignCenter)
 	title.SetProp("align-vert", gi.AlignTop)
 	title.SetProp("font-size", "x-large")
