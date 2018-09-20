@@ -254,6 +254,9 @@ func main() {
 	})
 }
 
+
+
+
 func mainrun() {
 	width := 1200
 	height := 900
@@ -289,11 +292,19 @@ func mainrun() {
 	trow.Lay = gi.LayoutVert
 	trow.SetStretchMaxWidth()
 
+
+
+
+
+
+
+
 	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
 	title.Text = `<b>Allowance</b>, made easy. This is a product of Kataform to be used to track allowance.`
 	title.SetProp("text-align", gi.AlignCenter)
 	title.SetProp("align-vert", gi.AlignTop)
 	title.SetProp("font-size", "x-large")
+
 
 	split := mfr.AddNewChild(gi.KiT_SplitView, "split").(*gi.SplitView)
 
@@ -314,6 +325,9 @@ func mainrun() {
 			}
 		}
 	})
+	
+	
+	
 	
 	
 	// events below here
@@ -337,7 +351,49 @@ func mainrun() {
 			}
 		}
 	})
+	/*
+	//next tab here
+	win2 := gi.NewWindow2D("kplanner", "Allowance2 | Kataform", width, height, true) // true = pixel sizes
 	
+	vp2 := win2.WinViewport2D()
+	updt2 := vp.UpdateStart()
+	//vp2.Fill = true
+
+	// // style sheet
+	// var css = ki.Props{
+	// 	"button": ki.Props{
+	// 		"background-color": gi.Color{255, 240, 240, 255},
+	// 	},
+	// 	"#combo": ki.Props{
+	// 		"background-color": gi.Color{240, 255, 240, 255},
+	// 	},
+	// 	".hslides": ki.Props{
+	// 		"background-color": gi.Color{240, 225, 255, 255},
+	// 	},
+	// 	"kbd": ki.Props{
+	// 		"color": "blue",
+	// 	},
+	// }
+	// vp.CSS = css
+
+	mfr2 := win2.SetMainFrame()
+	mfr2.SetProp("spacing", units.NewValue(1, units.Ex))
+	mfr2.SetProp("font-family", "Georgia, serif")
+
+	trow2 := mfr2.AddNewChild(gi.KiT_Layout, "trow2").(*gi.Layout)
+	trow2.Lay = gi.LayoutVert
+	trow2.SetStretchMaxWidth()
+
+
+
+
+	title2 := trow2.AddNewChild(gi.KiT_Label, "title2").(*gi.Label)
+	title2.Text = `<b>Allowance</b>, made easy. This is a product of Kataform to be used to track allowance.`
+	title2.SetProp("text-align", gi.AlignCenter)
+	title2.SetProp("align-vert", gi.AlignTop)
+	title2.SetProp("font-size", "x-large")
+
+*/
 	
 	// motivationText := trow.AddNewChild(gi.KiT_Label, "motivationText").(*gi.Label)
 	// motivationText.Text = "<b>Create Q2 goals for each of your roles! Make sure to do this weekly</b>"
@@ -414,9 +470,12 @@ func mainrun() {
 	// 	}
 	// })
 
-	vp.UpdateEndNoSig(updt)
+	
+vp.UpdateEndNoSig(updt)
+
 
 	win.StartEventLoop()
+	
 
 	// note: never gets here..
 	fmt.Printf("ending\n")
