@@ -264,7 +264,6 @@ func mainrun() {
 	// })
 
 	/*lt := LoadPlannerTable()
-
 	gi.StructTableView(lt)
 	*/
 	////

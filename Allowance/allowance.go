@@ -1,21 +1,20 @@
-// Copyright (c) 2018, The Kataform Authors. All rights reserved.
+// Copyright (c) 2018, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
 package main
 
 import (
+	"github.com/goki/gi"
+	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/giv"
+	"github.com/goki/gi/oswin"
+	
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 
-	//"time"
-	//"reflect"
-
-	"github.com/goki/gi"
-	"github.com/goki/gi/gimain"
-	"github.com/goki/gi/giv"
-	"github.com/goki/gi/units"
+//"github.com/goki/gi/units"
 	"github.com/goki/ki/kit"
 
 	//"github.com/goki/gi/units"
@@ -26,9 +25,18 @@ import (
 	//"time"
 )
 
+
+
+
+// data stuff starts here
+
+
+
 type AllowanceRec struct {
 	Person  string
-	Balance float64
+	Spending float64
+	Saving float64
+	Charity float64
 }
 
 // ** Work on allowance app and action **
@@ -105,6 +113,7 @@ var AllowanceTableProps = ki.Props{
 }
 
 var ThePlan AllowanceTable
+
 
 
 
@@ -191,233 +200,137 @@ var EventTableProps = ki.Props{
 
 var TheEvent EventTable
 
+// data stuff ends here
 
-
-
-// var PlannerDB *bolt.DB
-
-// func LoadAllowanceTable() []*AllowanceRec {
-
-// 	lt := make([]*AllowanceRec, 0, 100) // 100 is the starting capacity of slice -- increase if you expect more users.
-
-// 	PlannerDB.View(func(tx *bolt.Tx) error {
-// 		b := tx.Bucket([]byte("AllowanceTable"))
-
-// 		if b != nil {
-// 			b.ForEach(func(k, v []byte) error {
-// 				if v != nil {
-// 					rec := AllowanceRec{}
-// 					json.Unmarshal(v, &rec) // loads v value as json into rec
-// 					lt = append(lt, &rec)   // adds record to login table
-
-// 				}
-// 				return nil
-// 			})
-// 		}
-// 		return nil
-// 	})
-
-// 	return lt
-// }
-
-// func CheckLogin(usr, passwd string) bool {
-// 	lt := LoadAllowanceTable()
-// 	for _, lr := range lt {
-// 		if lr.Goal == usr && lr.Role == passwd {
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
-
-// func SaveNewLogin(rec *AllowanceRec) {
-// 	PlannerDB.Update(func(tx *bolt.Tx) error {
-// 		b, err := tx.CreateBucketIfNotExists([]byte("AllowanceTable"))
-// 		jb, err := json.Marshal(rec) // converts rec to json, as bytes jb
-
-// 		err = b.Put([]byte(rec.Goal), jb)
-// 		return err
-// 	})
-// }
 
 func main() {
-	// var err error
-	// PlannerDB, err = bolt.Open("Planner.db", 0600, nil)
-
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// defer PlannerDB.Close()
-
 	gimain.Main(func() {
 		mainrun()
 	})
 }
 
 func mainrun() {
-	width := 1200
-	height := 900
+	width := 1024
+	height := 768
 
-	win := gi.NewWindow2D("kplanner", "Allowance | Kataform", width, height, true) // true = pixel sizes
+fmt.Printf(fmt.Sprintf("The plan is: %v", ThePlan))
+
+	win := gi.NewWindow2D("gogi-tabview-test", "GoGi TabView Test", width, height, true) // pixel sizes
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
-	vp.Fill = true
-
-	// // style sheet
-	// var css = ki.Props{
-	// 	"button": ki.Props{
-	// 		"background-color": gi.Color{255, 240, 240, 255},
-	// 	},
-	// 	"#combo": ki.Props{
-	// 		"background-color": gi.Color{240, 255, 240, 255},
-	// 	},
-	// 	".hslides": ki.Props{
-	// 		"background-color": gi.Color{240, 225, 255, 255},
-	// 	},
-	// 	"kbd": ki.Props{
-	// 		"color": "blue",
-	// 	},
-	// }
-	// vp.CSS = css
 
 	mfr := win.SetMainFrame()
-	mfr.SetProp("spacing", units.NewValue(1, units.Ex))
-	mfr.SetProp("font-family", "Georgia, serif")
 
-	trow := mfr.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
-	trow.Lay = gi.LayoutVert
-	trow.SetStretchMaxWidth()
+	tv := mfr.AddNewChild(giv.KiT_TabView, "tv").(*giv.TabView)
 
-	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
-	title.Text = `<b>Allowance</b>, made easy. This is a product of Kataform to be used to track allowance.`
-	title.SetProp("text-align", gi.AlignCenter)
-	title.SetProp("align-vert", gi.AlignTop)
-	title.SetProp("font-size", "x-large")
+	lbl1k, _ := tv.AddNewTab(gi.KiT_SplitView, "Accounts")
+	
+	
+	// put first tab stuff in here
 
-	split := mfr.AddNewChild(gi.KiT_SplitView, "split").(*gi.SplitView)
 
-	tv := split.AddNewChild(giv.KiT_TableView, "tv").(*giv.TableView)
-	tv.Viewport = vp
+/*lbl1 := lbl1k.(*gi.Label)
+lbl1.Text = "Hello"
+*/
+
+	split := lbl1k.AddNewChild(gi.KiT_SplitView, "split").(*gi.SplitView)
+
+  grid := split.AddNewChild(gi.KiT_Layout, "grid").(*gi.Layout)
+	grid.Lay = gi.LayoutGrid
+//fmt.Printf(fmt.Sprintf("Num:%v", pr.Load("allowance.json")))
+
+
+ThePlan.Load("allowance.json")
+
+for i := 0; i < len(ThePlan); i++ {
+  
+fmt.Printf("Hello")
+	
+	
+	grid_sub := grid.AddNewChild(gi.KiT_Layout, fmt.Sprintf("grid_sub_%v", i)).(*gi.Layout)
+	grid_sub.Lay = gi.LayoutVert
+	
+	grid_sub.AddNewChild(gi.KiT_Space, fmt.Sprintf("spc_%v", i))
+	
+	grid_text_1 := grid_sub.AddNewChild(gi.KiT_Label, "grid_text_1").(*gi.Label)
+	grid_text_1.Text = fmt.Sprintf("<b>%v</b>", ThePlan[i].Person);
+	grid_text_1.SetProp("font-size", "x-large")
+	
+	grid_text_2 := grid_sub.AddNewChild(gi.KiT_Label, "grid_text_2").(*gi.Label)
+	grid_text_2.Text = fmt.Sprintf("<b>Spending</b>: %v", ThePlan[i].Spending);
+	
+	grid_text_3 := grid_sub.AddNewChild(gi.KiT_Label, "grid_text_3").(*gi.Label)
+	grid_text_3.Text = fmt.Sprintf("<b>Saving</b>: %v", ThePlan[i].Saving);
+	
+		grid_text_4 := grid_sub.AddNewChild(gi.KiT_Label, "grid_text_4").(*gi.Label)
+	grid_text_4.Text = fmt.Sprintf("<b>Charity</b>: %v", ThePlan[i].Charity);
+  
+  
+}
+
+
+	
+//lbl3 := split.AddNewChild(gi.KiT_Label, "lbl3").(*gi.Label)
+//lbl3.Text = "Text"
+
+/*	tablev := split.AddNewChild(giv.KiT_TableView, "tablev").(*giv.TableView)
+	tablev.Viewport = vp
+	
 	sv := split.AddNewChild(giv.KiT_StructView, "sv").(*giv.StructView)
 	sv.Viewport = vp
 
 	split.SetSplits(.5, .5)
-	tv.SetSlice(&ThePlan, nil)
+	
 
-	tv.WidgetSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	tablev.SetSlice(&ThePlan, nil)
+
+	tablev.WidgetSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.WidgetSelected) {
-			idx := tv.SelectedIdx
+			idx := tablev.SelectedIdx
 			if idx >= 0 {
 				rec := ThePlan[idx]
+				
 				sv.SetStruct(rec, nil)
 			}
 		}
 	})
 	
 	
-	// events below here
-	
-	split2 := mfr.AddNewChild(gi.KiT_SplitView, "split2").(*gi.SplitView)
-
-	tv2 := split2.AddNewChild(giv.KiT_TableView, "tv2").(*giv.TableView)
-	tv2.Viewport = vp
-	sv2 := split.AddNewChild(giv.KiT_StructView, "sv2").(*giv.StructView)
-	sv2.Viewport = vp
-
-	split2.SetSplits(.5, .5)
-	tv2.SetSlice(&TheEvent, nil)
-
-	tv2.WidgetSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.WidgetSelected) {
-			idx := tv.SelectedIdx
-			if idx >= 0 {
-				rec := TheEvent[idx]
-				sv2.SetStruct(rec, nil)
-			}
-		}
-	})
-	
-	
-	// motivationText := trow.AddNewChild(gi.KiT_Label, "motivationText").(*gi.Label)
-	// motivationText.Text = "<b>Create Q2 goals for each of your roles! Make sure to do this weekly</b>"
-	// motivationText.SetProp("text-align", gi.AlignCenter)
-
-	// buttonStartResult := trow.AddNewChild(gi.KiT_Label, "buttonStartResult").(*gi.Label)
-	// buttonStartResult.Text = "<b>Add new goal:</b>"
-	// userText := trow.AddNewChild(gi.KiT_TextField, "userText").(*gi.TextField)
-	// userText.SetText("Goal")
-	// userText.SetProp("width", "20em")
-	// passwdText := trow.AddNewChild(gi.KiT_TextField, "passwdText").(*gi.TextField)
-	// passwdText.SetText("Role")
-	// passwdText.SetProp("width", "20em")
-
-	// signUpButton := trow.AddNewChild(gi.KiT_Button, "signUpButton").(*gi.Button)
-	// signUpButton.Text = "<b>Create!</b>"
-
-	// signUpButton.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-	// 	//fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
-	// 	if sig == int64(gi.ButtonClicked) { // note: 3 diff ButtonSig sig's possible -- important to check
-	// 		// vp.Win.Quit()
-	// 		//gi.PromptDialog(vp, "Button1 Dialog", "This is a dialog!  Various specific types of dialogs are available.", true, true, nil, nil)
-	// 		updt := vp.UpdateStart()
-	// 		usr := userText.Text()
-	// 		passwd := passwdText.Text()
-
-	// 		newAllowanceRec := AllowanceRec{Goal: usr, Role: passwd}
-	// 		SaveNewLogin(&newAllowanceRec)
-
-	// 		vp.UpdateEnd(updt)
-	// 	}
-	// })
-
-	/*lt := LoadAllowanceTable()
-
-	gi.StructTableView(lt)
 	*/
-	////
-	// trow.AddNewChild(gi.KiT_Space, "spc1")
+		
 
-	// viewlogins := trow.AddNewChild(gi.KiT_Button, "viewlogins").(*gi.Button)
-	// viewlogins.SetText("View AllowanceTable")
-	// viewlogins.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-	// 	if sig == int64(gi.ButtonClicked) {
-	// 		lt := LoadAllowanceTable()
 
-	// 		giv.TableViewDialog(vp, &lt, giv.DlgOpts{Title: "Login Table"}, nil, nil, nil)
-	// 	}
-	// })
 
-	// addlogin := trow.AddNewChild(gi.KiT_Button, "addlogin").(*gi.Button)
-	// addlogin.SetText("Add Login")
-	// addlogin.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-	// 	if sig == int64(gi.ButtonClicked) {
-	// 		rec := AllowanceRec{}
-	// 		giv.StructViewDialog(vp, &rec, giv.DlgOpts{Title: "Enter Login Info"}, recv, func(recv, send ki.Ki, sig int64, data interface{}) {
-	// 			if sig == int64(gi.DialogAccepted) {
-	// 				SaveNewLogin(&rec)
-	// 			}
-	// 		})
-	// 	}
-	// })
+// next will be 2nd tab stuff
+	lbl2k, _ := tv.AddNewTab(gi.KiT_SplitView, "Transaction / Events")
+	split2 := lbl2k.AddNewChild(gi.KiT_SplitView, "split2").(*gi.SplitView)
+	text1 := split2.AddNewChild(gi.KiT_Label, "text1").(*gi.Label)
+	text1.Text = "<b>Welcome to the transaction screen</b>"
 
-	// quit := trow.AddNewChild(gi.KiT_Button, "quit").(*gi.Button)
-	// quit.SetText("Quit")
-	// quit.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-	// 	if sig == int64(gi.ButtonClicked) {
-	// 		gi.PromptDialog(vp, gi.DlgOpts{Title: "Quit", Prompt: "Quit: Are You Sure?"}, true, true, recv, func(recv, send ki.Ki, sig int64, data interface{}) {
-	// 			if sig == int64(gi.DialogAccepted) {
-	// 				PlannerDB.Close()
-	// 				oswin.TheApp.Quit()
-	// 			}
-	// 		})
-	// 	}
-	// })
+
+	tv.SelectTabIndex(0)
+
+	// main menu
+	appnm := oswin.TheApp.Name()
+	mmen := win.MainMenu
+	mmen.ConfigMenus([]string{appnm, "Edit", "Window"})
+
+	amen := win.MainMenu.KnownChildByName(appnm, 0).(*gi.Action)
+	amen.Menu = make(gi.Menu, 0, 10)
+	amen.Menu.AddAppMenu(win)
+
+	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
+	emen.Menu = make(gi.Menu, 0, 10)
+	emen.Menu.AddCopyCutPaste(win)
+
+	win.OSWin.SetCloseCleanFunc(func(w oswin.Window) {
+		go oswin.TheApp.Quit() // once main window is closed, quit
+	})
+
+	win.MainMenuUpdated()
 
 	vp.UpdateEndNoSig(updt)
 
 	win.StartEventLoop()
-
-	// note: never gets here..
-	fmt.Printf("ending\n")
 }
