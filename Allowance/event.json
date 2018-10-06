@@ -1,0 +1,26 @@
+[
+  {
+    "Person": "Max O'Reilly",
+    "Event": "Didn't do laundry",
+    "Money": -7.4,
+    "Account": "Spending"
+  },
+  {
+    "Person": "Kai O'Reilly",
+    "Event": "Did table without being asked",
+    "Money": 30,
+    "Account": "Spending"
+  },
+  {
+    "Person": "Max Munakata",
+    "Event": "Had milk all day",
+    "Money": 2,
+    "Account": "Spending"
+  },
+  {
+    "Person": "Kai O'Reilly",
+    "Event": "Ate dinner",
+    "Money": 300,
+    "Account": "Spending"
+  }
+]
