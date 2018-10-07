@@ -104,7 +104,7 @@ var AllowanceTableProps = ki.Props{
 	},
 }
 
-var TheAllowamce AllowanceTable
+var TheAllowance AllowanceTable
 
 // event data now
 
@@ -202,7 +202,7 @@ func mainrun() {
 	rec := ki.Node{}          // receiver for events
 	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
 
-	fmt.Printf(fmt.Sprintf("The plan is: %v", TheAllowamce))
+	fmt.Printf(fmt.Sprintf("The plan is: %v", TheAllowance))
 
 	win := gi.NewWindow2D("Allowance", "Allowance", width, height, true) // pixel sizes
 
@@ -227,9 +227,9 @@ func mainrun() {
 	grid.Lay = gi.LayoutGrid
 	//fmt.Printf(fmt.Sprintf("Num:%v", pr.Load("allowance.json")))
 
-	TheAllowamce.Load("allowance.json")
+	TheAllowance.Load("allowance.json")
 
-	for i := 0; i < len(TheAllowamce); i++ {
+	for i := 0; i < len(TheAllowance); i++ {
 
 		fmt.Printf("Hello")
 
@@ -239,17 +239,17 @@ func mainrun() {
 		grid_sub.AddNewChild(gi.KiT_Space, fmt.Sprintf("spc_%v", i))
 
 		grid_text_1 := grid_sub.AddNewChild(gi.KiT_Label, "grid_text_1").(*gi.Label)
-		grid_text_1.Text = fmt.Sprintf("<b>%v</b>", TheAllowamce[i].Person)
+		grid_text_1.Text = fmt.Sprintf("<b>%v</b>", TheAllowance[i].Person)
 		grid_text_1.SetProp("font-size", "x-large")
 
 		grid_text_2 := grid_sub.AddNewChild(gi.KiT_Label, "grid_text_2").(*gi.Label)
-		grid_text_2.Text = fmt.Sprintf("<b>Spending</b>: %v", TheAllowamce[i].Spending)
+		grid_text_2.Text = fmt.Sprintf("<b>Spending</b>: %v", TheAllowance[i].Spending)
 
 		grid_text_3 := grid_sub.AddNewChild(gi.KiT_Label, "grid_text_3").(*gi.Label)
-		grid_text_3.Text = fmt.Sprintf("<b>Saving</b>: %v", TheAllowamce[i].Saving)
+		grid_text_3.Text = fmt.Sprintf("<b>Saving</b>: %v", TheAllowance[i].Saving)
 
 		grid_text_4 := grid_sub.AddNewChild(gi.KiT_Label, "grid_text_4").(*gi.Label)
-		grid_text_4.Text = fmt.Sprintf("<b>Charity</b>: %v", TheAllowamce[i].Charity)
+		grid_text_4.Text = fmt.Sprintf("<b>Charity</b>: %v", TheAllowance[i].Charity)
 
 	}
 
@@ -265,13 +265,13 @@ func mainrun() {
 		split.SetSplits(.5, .5)
 
 
-		tablev.SetSlice(&TheAllowamce, nil)
+		tablev.SetSlice(&TheAllowance, nil)
 
 		tablev.WidgetSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.WidgetSelected) {
 				idx := tablev.SelectedIdx
 				if idx >= 0 {
-					rec := TheAllowamce[idx]
+					rec := TheAllowance[idx]
 
 					sv.SetStruct(rec, nil)
 				}
@@ -290,12 +290,12 @@ func mainrun() {
 	transtv := transtvk.(*gi.TabView)
 	fmt.Printf(fmt.Sprintf("%v", transtv))
 
-	TheAllowamce.Load("allowance.json")
+	TheAllowance.Load("allowance.json")
 	TheEvent.Load("event.json")
-	fmt.Printf("EVENTS: %v", len(TheAllowamce))
+	fmt.Printf("EVENTS: %v", len(TheAllowance))
 
-	for i := 0; i < len(TheAllowamce); i++ {
-		tab, _ := transtv.AddNewTab(gi.KiT_Layout, fmt.Sprintf("%v", TheAllowamce[i].Person))
+	for i := 0; i < len(TheAllowance); i++ {
+		tab, _ := transtv.AddNewTab(gi.KiT_Layout, fmt.Sprintf("%v", TheAllowance[i].Person))
 		addNewTrans := tab.AddNewChild(gi.KiT_Button, fmt.Sprintf("addNewTrans_%v", i)).(*gi.Button)
 		addNewTrans.Text = "Click here to add new transaction"
 		fmt.Printf(fmt.Sprintf("AA_%v", tab))
@@ -306,7 +306,7 @@ func mainrun() {
 		for j := 0; j < len(TheEvent); j++ {
 			fmt.Printf("BB_")
 			//fmt.Printf(fmt.Sprintf("CONTENT: %v"), TheEvent[j].Person)
-			if TheEvent[j].Person == TheAllowamce[i].Person {
+			if TheEvent[j].Person == TheAllowance[i].Person {
 
 				addNewTrans.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 					//fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
