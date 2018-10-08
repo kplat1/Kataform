@@ -12,7 +12,7 @@ import (
 	"github.com/goki/gi"
 	//"github.com/goki/gi/complete"
 	"github.com/goki/gi/gimain"
-	//"github.com/goki/gi/giv"
+	"github.com/goki/gi/giv"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
@@ -129,10 +129,19 @@ func mainrun() {
 						newNoteRow.SetStretchMaxWidth()
 						newNoteRow.SetStretchMaxHeight()
 
-						noteText := newNoteRow.AddNewChild(gi.KiT_TextField, fmt.Sprintf("noteText%v", val)).(*gi.TextField)
+						noteText := newNoteRow.AddNewChild(giv.KiT_TextView, fmt.Sprintf("noteText%v", val)).(*giv.TextView)
 						noteText.Placeholder = "Enter note contents here..."
 						// edit1.SetText("Edit this text")
-						noteText.SetProp("min-width", "20em")
+						//noteText.SetProp("min-width", "20em")
+
+
+txbuf := giv.NewTextBuf()
+	noteText.SetBuf(txbuf)
+	//.SetBuf(txbuf)
+
+	txbuf.Hi.Lang = ""
+	txbuf.Hi.Style = "emacs"
+	//\txbuf.Open(samplefile)
 
 
 vp.UpdateEnd(updt)
