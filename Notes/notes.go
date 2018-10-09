@@ -96,7 +96,7 @@ func mainrun() {
 	trow.SetStretchMaxHeight()
 
 	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label) // creates the text element
-	title.Text = "Welcome to Kataform Notes"                                         // sets the text value
+	title.Text = "Welcome to Kataform Notes"                     // sets the text value
 
 	button := trow.AddNewChild(gi.KiT_Button, "button").(*gi.Button) // creates the text element
 	button.Text = "Add note"                                         // sets the text value
@@ -109,11 +109,10 @@ func mainrun() {
 			gi.StringPromptDialog(vp, "", "Enter title of new note",
 				gi.DlgOpts{Title: "Enter note title", Prompt: "Enter the title of your new note."},
 				rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-				  
-				  updt := vp.UpdateStart()
-				  
-					dlg := send.(*gi.Dialog)
+
 					if sig == int64(gi.DialogAccepted) {
+						updt := vp.UpdateStart()
+						dlg := send.(*gi.Dialog)
 						val := gi.StringPromptDialogValue(dlg)
 						//fmt.Printf("got string value: %v\n", val)
 						fmt.Printf("Got value. Your title is: %v", val)
@@ -134,17 +133,12 @@ func mainrun() {
 						// edit1.SetText("Edit this text")
 						//noteText.SetProp("min-width", "20em")
 
-
-txbuf := giv.NewTextBuf()
-	noteText.SetBuf(txbuf)
-	//.SetBuf(txbuf)
-
-	txbuf.Hi.Lang = ""
-	txbuf.Hi.Style = "emacs"
-	//\txbuf.Open(samplefile)
-
-
-vp.UpdateEnd(updt)
+						txbuf := giv.NewTextBuf()
+						txbuf.Hi.Lang = ""
+						txbuf.Hi.Style = "emacs"
+						//\txbuf.Open(samplefile)
+						noteText.SetBuf(txbuf)
+						vp.UpdateEnd(updt)
 					}
 				})
 
