@@ -136,6 +136,7 @@ func mainrun() {
 						txbuf := giv.NewTextBuf()
 						txbuf.Hi.Lang = ""
 						txbuf.Hi.Style = "emacs"
+						txbuf.New(1) // add blank line
 						//\txbuf.Open(samplefile)
 						noteText.SetBuf(txbuf)
 						vp.UpdateEnd(updt)
