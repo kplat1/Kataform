@@ -9,12 +9,12 @@ import (
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/oswin"
-	
+
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 
-//"github.com/goki/gi/units"
+	//"github.com/goki/gi/units"
 	"github.com/goki/ki/kit"
 
 	//"github.com/goki/gi/units"
@@ -25,18 +25,13 @@ import (
 	//"time"
 )
 
-
-
-
 // data stuff starts here
 
-
-
 type AllowanceRec struct {
-	Person  string
+	Person   string
 	Spending float64
-	Saving float64
-	Charity float64
+	Saving   float64
+	Charity  float64
 }
 
 // ** Work on allowance app and action **
@@ -46,9 +41,6 @@ func (pr *AllowanceRec) Special(prompt string) {
 }
 
 type AllowanceTable []*AllowanceRec
-
-
-
 
 func (pr *AllowanceTable) SaveAs(filename gi.FileName) error {
 	b, err := json.MarshalIndent(pr, "", "  ")
@@ -112,17 +104,15 @@ var AllowanceTableProps = ki.Props{
 	},
 }
 
-var ThePlan AllowanceTable
-
-
-
+var TheAllowance AllowanceTable
 
 // event data now
 
-
 type EventRec struct {
 	Person  string
-	Event string
+	Event   string
+	Money   float64
+	Account string
 }
 
 // ** Work on Event app and action **
@@ -132,9 +122,6 @@ func (pr *EventRec) Special(prompt string) {
 }
 
 type EventTable []*EventRec
-
-
-
 
 func (pr *EventTable) SaveAs(filename gi.FileName) error {
 	b, err := json.MarshalIndent(pr, "", "  ")
@@ -202,7 +189,6 @@ var TheEvent EventTable
 
 // data stuff ends here
 
-
 func main() {
 	gimain.Main(func() {
 		mainrun()
@@ -213,101 +199,141 @@ func mainrun() {
 	width := 1024
 	height := 768
 
-fmt.Printf(fmt.Sprintf("The plan is: %v", ThePlan))
+	rec := ki.Node{}          // receiver for events
+	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
 
-	win := gi.NewWindow2D("gogi-tabview-test", "GoGi TabView Test", width, height, true) // pixel sizes
+	fmt.Printf(fmt.Sprintf("The plan is: %v", TheAllowance))
+
+	win := gi.NewWindow2D("Allowance", "Allowance", width, height, true) // pixel sizes
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
 
-	tv := mfr.AddNewChild(giv.KiT_TabView, "tv").(*giv.TabView)
+	tv := mfr.AddNewChild(gi.KiT_TabView, "tv").(*gi.TabView)
 
 	lbl1k, _ := tv.AddNewTab(gi.KiT_SplitView, "Accounts")
-	
-	
+
 	// put first tab stuff in here
 
-
-/*lbl1 := lbl1k.(*gi.Label)
-lbl1.Text = "Hello"
-*/
+	/*lbl1 := lbl1k.(*gi.Label)
+	  lbl1.Text = "Hello"
+	*/
 
 	split := lbl1k.AddNewChild(gi.KiT_SplitView, "split").(*gi.SplitView)
 
-  grid := split.AddNewChild(gi.KiT_Layout, "grid").(*gi.Layout)
+	grid := split.AddNewChild(gi.KiT_Layout, "grid").(*gi.Layout)
 	grid.Lay = gi.LayoutGrid
-//fmt.Printf(fmt.Sprintf("Num:%v", pr.Load("allowance.json")))
+	//fmt.Printf(fmt.Sprintf("Num:%v", pr.Load("allowance.json")))
 
+	TheAllowance.Load("allowance.json")
 
-ThePlan.Load("allowance.json")
+	for i := 0; i < len(TheAllowance); i++ {
 
-for i := 0; i < len(ThePlan); i++ {
-  
-fmt.Printf("Hello")
-	
-	
-	grid_sub := grid.AddNewChild(gi.KiT_Layout, fmt.Sprintf("grid_sub_%v", i)).(*gi.Layout)
-	grid_sub.Lay = gi.LayoutVert
-	
-	grid_sub.AddNewChild(gi.KiT_Space, fmt.Sprintf("spc_%v", i))
-	
-	grid_text_1 := grid_sub.AddNewChild(gi.KiT_Label, "grid_text_1").(*gi.Label)
-	grid_text_1.Text = fmt.Sprintf("<b>%v</b>", ThePlan[i].Person);
-	grid_text_1.SetProp("font-size", "x-large")
-	
-	grid_text_2 := grid_sub.AddNewChild(gi.KiT_Label, "grid_text_2").(*gi.Label)
-	grid_text_2.Text = fmt.Sprintf("<b>Spending</b>: %v", ThePlan[i].Spending);
-	
-	grid_text_3 := grid_sub.AddNewChild(gi.KiT_Label, "grid_text_3").(*gi.Label)
-	grid_text_3.Text = fmt.Sprintf("<b>Saving</b>: %v", ThePlan[i].Saving);
-	
+		fmt.Printf("Hello")
+
+		grid_sub := grid.AddNewChild(gi.KiT_Layout, fmt.Sprintf("grid_sub_%v", i)).(*gi.Layout)
+		grid_sub.Lay = gi.LayoutVert
+
+		grid_sub.AddNewChild(gi.KiT_Space, fmt.Sprintf("spc_%v", i))
+
+		grid_text_1 := grid_sub.AddNewChild(gi.KiT_Label, "grid_text_1").(*gi.Label)
+		grid_text_1.Text = fmt.Sprintf("<b>%v</b>", TheAllowance[i].Person)
+		grid_text_1.SetProp("font-size", "x-large")
+
+		grid_text_2 := grid_sub.AddNewChild(gi.KiT_Label, "grid_text_2").(*gi.Label)
+		grid_text_2.Text = fmt.Sprintf("<b>Spending</b>: %v", TheAllowance[i].Spending)
+
+		grid_text_3 := grid_sub.AddNewChild(gi.KiT_Label, "grid_text_3").(*gi.Label)
+		grid_text_3.Text = fmt.Sprintf("<b>Saving</b>: %v", TheAllowance[i].Saving)
+
 		grid_text_4 := grid_sub.AddNewChild(gi.KiT_Label, "grid_text_4").(*gi.Label)
-	grid_text_4.Text = fmt.Sprintf("<b>Charity</b>: %v", ThePlan[i].Charity);
-  
-  
-}
+		grid_text_4.Text = fmt.Sprintf("<b>Charity</b>: %v", TheAllowance[i].Charity)
+
+	}
+
+	//lbl3 := split.AddNewChild(gi.KiT_Label, "lbl3").(*gi.Label)
+	//lbl3.Text = "Text"
+
+	/*	tablev := split.AddNewChild(giv.KiT_TableView, "tablev").(*giv.TableView)
+		tablev.Viewport = vp
+
+		sv := split.AddNewChild(giv.KiT_StructView, "sv").(*giv.StructView)
+		sv.Viewport = vp
+
+		split.SetSplits(.5, .5)
 
 
-	
-//lbl3 := split.AddNewChild(gi.KiT_Label, "lbl3").(*gi.Label)
-//lbl3.Text = "Text"
+		tablev.SetSlice(&TheAllowance, nil)
 
-/*	tablev := split.AddNewChild(giv.KiT_TableView, "tablev").(*giv.TableView)
-	tablev.Viewport = vp
-	
-	sv := split.AddNewChild(giv.KiT_StructView, "sv").(*giv.StructView)
-	sv.Viewport = vp
+		tablev.WidgetSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.WidgetSelected) {
+				idx := tablev.SelectedIdx
+				if idx >= 0 {
+					rec := TheAllowance[idx]
 
-	split.SetSplits(.5, .5)
-	
-
-	tablev.SetSlice(&ThePlan, nil)
-
-	tablev.WidgetSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.WidgetSelected) {
-			idx := tablev.SelectedIdx
-			if idx >= 0 {
-				rec := ThePlan[idx]
-				
-				sv.SetStruct(rec, nil)
+					sv.SetStruct(rec, nil)
+				}
 			}
-		}
-	})
-	
-	
+		})
+
+
 	*/
-		
 
+	// next will be 2nd tab stuff
+	lbl2k, _ := tv.AddNewTab(gi.KiT_TabView, "Transaction / Events")
+	lbl2 := lbl2k.(*gi.TabView)
+	fmt.Printf(fmt.Sprintf("%v", lbl2k))
 
+	transtvk, _ := lbl2.AddNewTab(gi.KiT_TabView, "transtv")
+	transtv := transtvk.(*gi.TabView)
+	fmt.Printf(fmt.Sprintf("%v", transtv))
 
-// next will be 2nd tab stuff
-	lbl2k, _ := tv.AddNewTab(gi.KiT_SplitView, "Transaction / Events")
-	split2 := lbl2k.AddNewChild(gi.KiT_SplitView, "split2").(*gi.SplitView)
-	text1 := split2.AddNewChild(gi.KiT_Label, "text1").(*gi.Label)
-	text1.Text = "<b>Welcome to the transaction screen</b>"
+	TheAllowance.Load("allowance.json")
+	TheEvent.Load("event.json")
+	fmt.Printf("EVENTS: %v", len(TheAllowance))
 
+	for i := 0; i < len(TheAllowance); i++ {
+		tab, _ := transtv.AddNewTab(gi.KiT_Layout, fmt.Sprintf("%v", TheAllowance[i].Person))
+		addNewTrans := tab.AddNewChild(gi.KiT_Button, fmt.Sprintf("addNewTrans_%v", i)).(*gi.Button)
+		addNewTrans.Text = "Click here to add new transaction"
+		fmt.Printf(fmt.Sprintf("AA_%v", tab))
+		//split2 := tab.AddNewChild(gi.KiT_SplitView, "split2").(*gi.SplitView)
+		//split_lay := tab.AddNewChild(gi.KiT_Layout, fmt.Sprintf("split_lay_%v", i)).(*gi.Layout)
+		//split_lay.Lay = gi.LayoutVert
+
+		for j := 0; j < len(TheEvent); j++ {
+			fmt.Printf("BB_")
+			//fmt.Printf(fmt.Sprintf("CONTENT: %v"), TheEvent[j].Person)
+			if TheEvent[j].Person == TheAllowance[i].Person {
+
+				addNewTrans.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+					//fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
+					if sig == int64(gi.ButtonClicked) { // note: 3 diff ButtonSig sig's possible -- important to check
+						rec := &EventRec{}
+						giv.StructViewDialog(vp, rec, giv.DlgOpts{Title: "Transaction", Prompt: "Enter Transaction Info", Ok: true, Cancel: true}, recv, func(recv, send ki.Ki, sig int64, data interface{}) {
+								if sig == int64(gi.DialogAccepted) {
+									TheEvent = append(TheEvent, rec)
+									TheEvent.SaveDefault()
+									
+									// add allowance updater
+								}
+							})
+
+					}
+				})
+
+				split_lay_text := tab.AddNewChild(gi.KiT_Label, fmt.Sprintf("event_tab_lay_%v", j)).(*gi.Label)
+
+				split_lay_text.Text = fmt.Sprintf("<b>Event:</b> %v", TheEvent[j].Event)
+				tab.AddNewChild(gi.KiT_Space, fmt.Sprintf("spc_%v", j))
+
+			}
+
+		}
+
+	}
 
 	tv.SelectTabIndex(0)
 

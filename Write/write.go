@@ -1,4 +1,4 @@
-aa// Copyright (c) 2018, The Kataform Authors. All rights reserved.
+// Copyright (c) 2018, The Kataform Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -66,14 +66,14 @@ rec := ki.Node{}          // receiver for events
 	vp.CSS = css
 
 	vlay := vp.AddNewChild(gi.KiT_Frame, "vlay").(*gi.Frame)
-	vlay.Lay = gi.LayoutCol
+	vlay.Lay = gi.LayoutVert
 	// vlay.SetProp("background-color", "linear-gradient(to top, red, lighter-80)")
 	// vlay.SetProp("background-color", "linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)")
 	// vlay.SetProp("background-color", "linear-gradient(to right, rgba(255,0,0,0), rgba(255,0,0,1))")
 	// vlay.SetProp("background-color", "radial-gradient(red, lighter-80)")
 
 	trow := vlay.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
-	trow.Lay = gi.LayoutCol
+	trow.Lay = gi.LayoutVert
 	trow.SetStretchMaxWidth()
 
 	trow.AddNewChild(gi.KiT_Stretch, "str1")
