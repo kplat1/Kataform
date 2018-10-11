@@ -5,19 +5,103 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	//"go/token"
-	//	"reflect"
-
+	"io/ioutil"
+	//"time"
+	//"reflect"
 	"github.com/goki/gi"
-	//"github.com/goki/gi/complete"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
+	"github.com/goki/ki/kit"
+	//"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	//"github.com/goki/ki/kit"
+	//"oswin"
+	"log"
+	//"time"
 )
+
+// data stuff
+
+type NoteRec struct {
+	Title string
+	Note  string
+}
+
+//func (pr *NoteRec) Special(prompt string) {
+//	fmt.Printf("this is a special function!  %v", prompt)
+//}
+
+type NoteTable []*NoteRec
+
+func (pr *NoteTable) SaveAs(filename gi.FileName) error {
+	b, err := json.MarshalIndent(pr, "", "  ")
+	if err != nil {
+		log.Println(err) // unlikely
+		return err
+	}
+	err = ioutil.WriteFile(string(filename), b, 0644)
+	if err != nil {
+		gi.PromptDialog(nil, gi.DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, true, false, nil, nil)
+		log.Println(err)
+	}
+	return nil
+}
+
+func (pr *NoteTable) SaveDefault() error {
+	return pr.SaveAs("notes.json")
+}
+
+func (pr *NoteTable) Load(filename gi.FileName) error {
+	b, err := ioutil.ReadFile(string(filename))
+	if err != nil {
+		gi.PromptDialog(nil, gi.DlgOpts{Title: "File Not Found", Prompt: err.Error()}, true, false, nil, nil)
+		log.Println(err)
+		return err
+	}
+	return json.Unmarshal(b, pr)
+}
+
+func (pr *NoteTable) LoadDefault() error {
+	return pr.Load("notes.json")
+}
+
+var KiT_NoteTable = kit.Types.AddType(&NoteTable{}, NoteTableProps)
+
+var NoteTableProps = ki.Props{
+	"MainMenu": ki.PropSlice{
+		{"AppMenu", ki.BlankProp{}},
+		{"File", ki.PropSlice{
+			{"LoadDefault", ki.Props{
+				"shortcut": "Command+O",
+			}},
+			{"SaveDefault", ki.Props{
+				"shortcut": "Command+S",
+			}},
+			{"sep-close", ki.BlankProp{}},
+			{"Close Window", ki.BlankProp{}},
+		}},
+		{"Edit", "Copy Cut Paste"},
+		{"Window", "Windows"},
+	},
+	"ToolBar": ki.PropSlice{
+		{"SaveDefault", ki.Props{
+			"label": "Save",
+			"icon":  "file-save",
+		}},
+		{"LoadDefault", ki.Props{
+			"label": "Load",
+			"icon":  "file-save",
+		}},
+	},
+}
+
+var TheNote NoteTable
+
+// end of data stuff
 
 func main() {
 	gimain.Main(func() {
@@ -128,6 +212,10 @@ func mainrun() {
 						newNoteRow.SetStretchMaxWidth()
 						newNoteRow.SetStretchMaxHeight()
 
+						noteSave := newNoteRow.AddNewChild(gi.KiT_Button, fmt.Sprintf("noteSave%v", val)).(*gi.Button)
+						noteSave.Text = "Save your note"
+
+
 						noteText := newNoteRow.AddNewChild(giv.KiT_TextView, fmt.Sprintf("noteText%v", val)).(*giv.TextView)
 						noteText.Placeholder = "Enter note contents here..."
 						// edit1.SetText("Edit this text")
@@ -138,8 +226,25 @@ func mainrun() {
 						txbuf.Hi.Style = "emacs"
 						txbuf.New(1) // add blank line
 						//\txbuf.Open(samplefile)
+
 						noteText.SetBuf(txbuf)
 						vp.UpdateEnd(updt)
+
+						noteSave.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+							//fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
+							if sig == int64(gi.ButtonClicked) {
+
+								Title := fmt.Sprintf("%v", val)
+								Note := fmt.Sprintf("%v", txbuf.Text)
+								rec := &NoteRec{Title, Note}
+								
+
+								TheNote = append(TheNote, rec)
+								TheNote.SaveDefault()
+							}
+						})
+
+
 					}
 				})
 
