@@ -101,13 +101,46 @@ type mapRow struct{
 	
 	 var Map []mapRow
 	
-	Map = append(Map, mapRow{"woodBlock1", "woodBlock", 15, 29, 3}) // creates an object
-	Map = append(Map, mapRow{"woodBlock2", "woodBlock", 78, 45, 17})
-	Map = append(Map, mapRow{"pathBlock1", "pathBlock", 0, 30, -4})
-	Map = append(Map, mapRow{"jjnk", "patBlock", 78, 45, 8})
 	
 	
 	
+	
+	// BLOCK TYPES
+	
+	
+	/* TYPES:
+	
+	woodBlock
+	metalBlock
+	stoneBlock
+	grassLayer
+	dirtLayer
+	roundRock
+	metalDoor
+	woodStore
+	stoneStore
+	metalStore
+	waterLayer
+	
+	
+	*/
+	
+	
+	// END BLOCK TYPES
+	
+	
+	
+	
+	
+	// THE MAP
+	
+	
+	
+	Map = append(Map, mapRow{"dirtLayer1", "dirtLayer", 0, 0, 0}) // creates a new thing to the map
+		Map = append(Map, mapRow{"grassLayer1", "grassLayer", 0, 0, 1})
+			Map = append(Map, mapRow{"woodStore1", "woodStore", 0, 0, 2})
+	
+	// END OF THE MAP
 	
 	
 
@@ -128,8 +161,33 @@ type mapRow struct{
 // game goes right here
 
 
-for i := 0; i < 4; i++ {
-  if Map[i].typeOf == "woodBlock" {
+for i := 0; i < len(Map); i++ {
+  
+   if Map[i].typeOf == "dirtLayer" {
+    updt := vp.UpdateStart()
+    
+    dirtLayerText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("dirtLayerText%v", i)).(*gi.Label)
+    dirtLayerText.Text = fmt.Sprintf("Row %v is a Dirt Layer at x position %v and y position %v. It is at height %v.", i, Map[i].x, Map[i].y, Map[i].z)
+    
+   	vp.UpdateEnd(updt)
+ 
+  } else if Map[i].typeOf == "grassLayer" {
+    updt := vp.UpdateStart()
+    
+    grassLayerText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("grassLayerText%v", i)).(*gi.Label)
+    grassLayerText.Text = fmt.Sprintf("Row %v is a Grass Layer at x position %v and y position %v. It is at height %v.", i, Map[i].x, Map[i].y, Map[i].z)
+    
+   	vp.UpdateEnd(updt)
+ 
+  } else if Map[i].typeOf == "woodStore" {
+    updt := vp.UpdateStart()
+    
+    woodStoreText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("woodStoreText%v", i)).(*gi.Label)
+    woodStoreText.Text = fmt.Sprintf("Row %v is a Wood Store at x position %v and y position %v. It is at height %v.", i, Map[i].x, Map[i].y, Map[i].z)
+    
+   	vp.UpdateEnd(updt)
+ 
+  } else if Map[i].typeOf == "woodBlock" {
     updt := vp.UpdateStart()
     
     woodBlockText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("woodBlockText%v", i)).(*gi.Label)
