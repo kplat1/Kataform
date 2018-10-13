@@ -16,7 +16,7 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
-//	"github.com/goki/ki/kit"
+	//	"github.com/goki/ki/kit"
 )
 
 func main() {
@@ -28,11 +28,6 @@ func main() {
 func mainrun() {
 	width := 1024
 	height := 768
-	
-	
-	
-	
-	
 
 	// turn these on to see a traces of various stages of processing..
 	// gi.Update2DTrace = true
@@ -81,35 +76,26 @@ func mainrun() {
 	trow.Lay = gi.LayoutVert
 	trow.SetStretchMaxWidth()
 
-
-
-
-type mapRow struct{
-  id string
-  typeOf string
-  x float64
-  y float64
-  z float64
-}
+	type mapRow struct {
+		id     string
+		typeOf string
+		x      float64
+		y      float64
+		z      float64
+	}
 	//fmt.Printf("%v", mapRow{"block1", "block", 7, 8})
-	
 
 	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
 	title.Text = "Game"
-	
+
 	//mapRow{"idName", "typeOf", 7, 8}
-	
-	 var Map []mapRow
-	
-	
-	
-	
-	
+
+	var Map []mapRow
+
 	// BLOCK TYPES
-	
-	
+
 	/* TYPES:
-	
+
 	woodBlock
 	metalBlock
 	stoneBlock
@@ -121,33 +107,20 @@ type mapRow struct{
 	stoneStore
 	metalStore
 	waterLayer
-	
-	
+
+
 	*/
-	
-	
+
 	// END BLOCK TYPES
-	
-	
-	
-	
-	
+
 	// THE MAP
-	
-	
-	
+
 	Map = append(Map, mapRow{"dirtLayer1", "dirtLayer", 0, 0, 0}) // creates a new thing to the map
-		Map = append(Map, mapRow{"grassLayer1", "grassLayer", 0, 0, 1})
-			Map = append(Map, mapRow{"woodStore1", "woodStore", 0, 0, 2})
-	
+	Map = append(Map, mapRow{"grassLayer1", "grassLayer", 0, 0, 1})
+	Map = append(Map, mapRow{"woodStore1", "woodStore", 0, 0, 2})
+
 	// END OF THE MAP
-	
-	
 
-	
-	
-
-	
 	title.SetProp("white-space", gi.WhiteSpaceNormal) // wrap
 	title.SetProp("text-align", gi.AlignCenter)       // note: this also sets horizontal-align, which controls the "box" that the text is rendered in..
 	title.SetProp("vertical-align", gi.AlignCenter)
@@ -158,80 +131,81 @@ type mapRow struct{
 	title.SetStretchMaxWidth()
 	title.SetStretchMaxHeight()
 
-// game goes right here
+	// game goes right here
 
+	//fmt.Printf("%v", img)
 
-for i := 0; i < len(Map); i++ {
-  
-   if Map[i].typeOf == "dirtLayer" {
-    updt := vp.UpdateStart()
-    
-    dirtLayerText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("dirtLayerText%v", i)).(*gi.Label)
-    dirtLayerText.Text = fmt.Sprintf("Row %v is a Dirt Layer at x position %v and y position %v. It is at height %v.", i, Map[i].x, Map[i].y, Map[i].z)
-    
-   	vp.UpdateEnd(updt)
- 
-  } else if Map[i].typeOf == "grassLayer" {
-    updt := vp.UpdateStart()
-    
-    grassLayerText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("grassLayerText%v", i)).(*gi.Label)
-    grassLayerText.Text = fmt.Sprintf("Row %v is a Grass Layer at x position %v and y position %v. It is at height %v.", i, Map[i].x, Map[i].y, Map[i].z)
-    
-   	vp.UpdateEnd(updt)
- 
-  } else if Map[i].typeOf == "woodStore" {
-    updt := vp.UpdateStart()
-    
-    woodStoreText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("woodStoreText%v", i)).(*gi.Label)
-    woodStoreText.Text = fmt.Sprintf("Row %v is a Wood Store at x position %v and y position %v. It is at height %v.", i, Map[i].x, Map[i].y, Map[i].z)
-    
-   	vp.UpdateEnd(updt)
- 
-  } else if Map[i].typeOf == "woodBlock" {
-    updt := vp.UpdateStart()
-    
-    woodBlockText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("woodBlockText%v", i)).(*gi.Label)
-    woodBlockText.Text = fmt.Sprintf("Row %v is a Wood Block at x position %v and y position %v. It is at height %v.", i, Map[i].x, Map[i].y, Map[i].z)
-    
-   	vp.UpdateEnd(updt)
- 
-  } else if Map[i].typeOf == "pathBlock" {
-    updt := vp.UpdateStart()
-    
-    pathBlockText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("pathBlockText%v", i)).(*gi.Label)
-    pathBlockText.Text = fmt.Sprintf("Row %v is a Path Block at x position %v and y position %v. It is at height %v.", i, Map[i].x, Map[i].y, Map[i].z)
-    
-   	vp.UpdateEnd(updt)
-  } else {
-   updt := vp.UpdateStart()
-    
-    errorBlockText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("errorBlockText%v", i)).(*gi.Label)
-    errorBlockText.Text = fmt.Sprintf("Error. Type %v does not exist.", Map[i].typeOf)
-    
-   	vp.UpdateEnd(updt)
-  }
-}
-	
-	
-	
-	
-	
-	
-/*	inputConfirm := trow.AddNewChild(gi.KiT_Button, "inputConfirm").(*gi.Button)
-	inputConfirm.Text = "Done"
-	// button2.SetProp("background-color", "#EDF")
-	inputConfirm.Tooltip = "This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things"
-	inputConfirm.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
-		if sig == int64(gi.ButtonClicked) {
-		  textResult := input1.Text()
-			fmt.Printf("%v", mapRow{textResult, "block", 7, 8})
+	for i := 0; i < len(Map); i++ {
+
+		if Map[i].typeOf == "dirtLayer" {
+			updt := vp.UpdateStart()
+
+			dirtLayerText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("dirtLayerText%v", i)).(*gi.Label)
+			dirtLayerText.Text = fmt.Sprintf("Row %v is a Dirt Layer at x position %v and y position %v. It is at height %v.", i, Map[i].x, Map[i].y, Map[i].z)
+
+			imgDirt := trow.AddNewChild(gi.KiT_Bitmap, fmt.Sprintf("imgDirt%v", i)).(*gi.Bitmap)
+			imgDirt.OpenImage("dirt.jpg", 500, 500)
+
+			vp.UpdateEnd(updt)
+
+		} else if Map[i].typeOf == "grassLayer" {
+			updt := vp.UpdateStart()
+
+			grassLayerText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("grassLayerText%v", i)).(*gi.Label)
+			grassLayerText.Text = fmt.Sprintf("Row %v is a Grass Layer at x position %v and y position %v. It is at height %v.", i, Map[i].x, Map[i].y, Map[i].z)
+
+			imgGrass := trow.AddNewChild(gi.KiT_Bitmap, fmt.Sprintf("imgGrass%v", i)).(*gi.Bitmap)
+			imgGrass.OpenImage("grass.jpg", 500, 500)
+
+			vp.UpdateEnd(updt)
+
+		} else if Map[i].typeOf == "woodStore" {
+			updt := vp.UpdateStart()
+
+			woodStoreText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("woodStoreText%v", i)).(*gi.Label)
+			woodStoreText.Text = fmt.Sprintf("Row %v is a Wood Store at x position %v and y position %v. It is at height %v.", i, Map[i].x, Map[i].y, Map[i].z)
+
+			imgWoodStore := trow.AddNewChild(gi.KiT_Bitmap, fmt.Sprintf("imgWoodStore%v", i)).(*gi.Bitmap)
+			imgWoodStore.OpenImage("woodStore.jpg", 500, 500)
+			vp.UpdateEnd(updt)
+
+		} else if Map[i].typeOf == "woodBlock" {
+			updt := vp.UpdateStart()
+
+			woodBlockText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("woodBlockText%v", i)).(*gi.Label)
+			woodBlockText.Text = fmt.Sprintf("Row %v is a Wood Block at x position %v and y position %v. It is at height %v.", i, Map[i].x, Map[i].y, Map[i].z)
+
+			vp.UpdateEnd(updt)
+
+		} else if Map[i].typeOf == "pathBlock" {
+			updt := vp.UpdateStart()
+
+			pathBlockText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("pathBlockText%v", i)).(*gi.Label)
+			pathBlockText.Text = fmt.Sprintf("Row %v is a Path Block at x position %v and y position %v. It is at height %v.", i, Map[i].x, Map[i].y, Map[i].z)
+
+			vp.UpdateEnd(updt)
+		} else {
+			updt := vp.UpdateStart()
+
+			errorBlockText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("errorBlockText%v", i)).(*gi.Label)
+			errorBlockText.Text = fmt.Sprintf("Error. Type %v does not exist.", Map[i].typeOf)
+
+			vp.UpdateEnd(updt)
 		}
-	})
-	*/
-	
-	
+	}
 
+	/*	inputConfirm := trow.AddNewChild(gi.KiT_Button, "inputConfirm").(*gi.Button)
+		inputConfirm.Text = "Done"
+		// button2.SetProp("background-color", "#EDF")
+		inputConfirm.Tooltip = "This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things"
+		inputConfirm.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
+			if sig == int64(gi.ButtonClicked) {
+			  textResult := input1.Text()
+				fmt.Printf("%v", mapRow{textResult, "block", 7, 8})
+			}
+		})
+	*/
 
 	vp.UpdateEndNoSig(updt)
 
