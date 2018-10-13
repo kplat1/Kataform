@@ -96,14 +96,14 @@ func mainrun() {
 
 	/* TYPES:
 
-	woodBlock
-	metalBlock
-	stoneBlock
-	grassLayer
-	dirtLayer
+	woodBlock DONE
+	metalBlock DONE
+	stoneBlock DONE
+	grassLayer DONE
+	dirtLayer  DONE
 	roundRock
 	metalDoor
-	woodStore
+	woodStore  DONE
 	stoneStore
 	metalStore
 	waterLayer
@@ -118,6 +118,9 @@ func mainrun() {
 	Map = append(Map, mapRow{"dirtLayer1", "dirtLayer", 0, 0, 0}) // creates a new thing to the map
 	Map = append(Map, mapRow{"grassLayer1", "grassLayer", 0, 0, 1})
 	Map = append(Map, mapRow{"woodStore1", "woodStore", 0, 0, 2})
+	Map = append(Map, mapRow{"woodBlock1", "woodBlock", -7, -3, 2})
+		Map = append(Map, mapRow{"stoneBlock1", "stoneBlock", -9, -3, 2})
+			Map = append(Map, mapRow{"metalBlock1", "metalBlock", -11, -3, 2})
 
 	// END OF THE MAP
 
@@ -135,6 +138,9 @@ func mainrun() {
 
 	//fmt.Printf("%v", img)
 
+var imgSize float32 = 400
+
+
 	for i := 0; i < len(Map); i++ {
 
 		if Map[i].typeOf == "dirtLayer" {
@@ -144,7 +150,7 @@ func mainrun() {
 			dirtLayerText.Text = fmt.Sprintf("Row %v is a Dirt Layer at x position %v and y position %v. It is at height %v.", i, Map[i].x, Map[i].y, Map[i].z)
 
 			imgDirt := trow.AddNewChild(gi.KiT_Bitmap, fmt.Sprintf("imgDirt%v", i)).(*gi.Bitmap)
-			imgDirt.OpenImage("dirt.jpg", 500, 500)
+			imgDirt.OpenImage("dirt.jpg", imgSize, imgSize)
 
 			vp.UpdateEnd(updt)
 
@@ -155,18 +161,51 @@ func mainrun() {
 			grassLayerText.Text = fmt.Sprintf("Row %v is a Grass Layer at x position %v and y position %v. It is at height %v.", i, Map[i].x, Map[i].y, Map[i].z)
 
 			imgGrass := trow.AddNewChild(gi.KiT_Bitmap, fmt.Sprintf("imgGrass%v", i)).(*gi.Bitmap)
-			imgGrass.OpenImage("grass.jpg", 500, 500)
+			imgGrass.OpenImage("grass.jpg", imgSize, imgSize)
 
 			vp.UpdateEnd(updt)
 
-		} else if Map[i].typeOf == "woodStore" {
+		} else if Map[i].typeOf == "woodBlock" {
+			updt := vp.UpdateStart()
+
+			woodBlockText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("woodBlockText%v", i)).(*gi.Label)
+			woodBlockText.Text = fmt.Sprintf("Row %v is a Wood Block at x position %v and y position %v. It is at height %v.", i, Map[i].x, Map[i].y, Map[i].z)
+
+			imgWood := trow.AddNewChild(gi.KiT_Bitmap, fmt.Sprintf("imgWood%v", i)).(*gi.Bitmap)
+			imgWood.OpenImage("wood.jpg", imgSize, imgSize)
+
+			vp.UpdateEnd(updt)
+
+		}  else if Map[i].typeOf == "metalBlock" {
+			updt := vp.UpdateStart()
+
+			metalBlockText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("metalBlockText%v", i)).(*gi.Label)
+			metalBlockText.Text = fmt.Sprintf("Row %v is a Metal Block at x position %v and y position %v. It is at height %v.", i, Map[i].x, Map[i].y, Map[i].z)
+
+			imgMetal := trow.AddNewChild(gi.KiT_Bitmap, fmt.Sprintf("imgMetal%v", i)).(*gi.Bitmap)
+			imgMetal.OpenImage("metal.jpg", imgSize, imgSize)
+
+			vp.UpdateEnd(updt)
+
+		} else if Map[i].typeOf == "stoneBlock" {
+			updt := vp.UpdateStart()
+
+			stoneBlockText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("stoneBlockText%v", i)).(*gi.Label)
+			stoneBlockText.Text = fmt.Sprintf("Row %v is a Stone Block at x position %v and y position %v. It is at height %v.", i, Map[i].x, Map[i].y, Map[i].z)
+
+			imgStone := trow.AddNewChild(gi.KiT_Bitmap, fmt.Sprintf("imgStone%v", i)).(*gi.Bitmap)
+			imgStone.OpenImage("stone.jpg", imgSize, imgSize)
+
+			vp.UpdateEnd(updt)
+
+		}	else if Map[i].typeOf == "woodStore" {
 			updt := vp.UpdateStart()
 
 			woodStoreText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("woodStoreText%v", i)).(*gi.Label)
 			woodStoreText.Text = fmt.Sprintf("Row %v is a Wood Store at x position %v and y position %v. It is at height %v.", i, Map[i].x, Map[i].y, Map[i].z)
 
 			imgWoodStore := trow.AddNewChild(gi.KiT_Bitmap, fmt.Sprintf("imgWoodStore%v", i)).(*gi.Bitmap)
-			imgWoodStore.OpenImage("woodStore.jpg", 500, 500)
+			imgWoodStore.OpenImage("woodStore.jpg", imgSize, imgSize)
 			vp.UpdateEnd(updt)
 
 		} else if Map[i].typeOf == "woodBlock" {
