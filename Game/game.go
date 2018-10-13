@@ -101,12 +101,12 @@ func mainrun() {
 	stoneBlock DONE
 	grassLayer DONE
 	dirtLayer  DONE
-	roundRock
+	roundRock NEED
 	metalDoor
 	woodStore  DONE
-	stoneStore
+	stoneStore NEED
 	metalStore
-	waterLayer
+	waterLayer NEED
 
 
 	*/
@@ -116,6 +116,10 @@ func mainrun() {
 	// THE MAP
 
 	Map = append(Map, mapRow{"dirtLayer1", "dirtLayer", 0, 0, 0}) // creates a new thing to the map
+	
+	
+	
+	
 	Map = append(Map, mapRow{"grassLayer1", "grassLayer", 0, 0, 1})
 	Map = append(Map, mapRow{"woodStore1", "woodStore", 0, 0, 2})
 	Map = append(Map, mapRow{"woodBlock1", "woodBlock", -7, -3, 2})
@@ -162,6 +166,39 @@ var imgSize float32 = 400
 
 			imgGrass := trow.AddNewChild(gi.KiT_Bitmap, fmt.Sprintf("imgGrass%v", i)).(*gi.Bitmap)
 			imgGrass.OpenImage("grass.jpg", imgSize, imgSize)
+
+			vp.UpdateEnd(updt)
+
+		} else if Map[i].typeOf == "waterLayer" {
+			updt := vp.UpdateStart()
+
+			waterLayerText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("waterLayerText%v", i)).(*gi.Label)
+			waterLayerText.Text = fmt.Sprintf("Row %v is a Water Layer at x position %v and y position %v. It is at height %v.", i, Map[i].x, Map[i].y, Map[i].z)
+
+			imgWater := trow.AddNewChild(gi.KiT_Bitmap, fmt.Sprintf("imgWater%v", i)).(*gi.Bitmap)
+			imgWater.OpenImage("water.jpg", imgSize, imgSize)
+
+			vp.UpdateEnd(updt)
+
+		} else if Map[i].typeOf == "stoneStore" {
+			updt := vp.UpdateStart()
+
+			stoneStoreText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("stoneStoreText%v", i)).(*gi.Label)
+			stoneStoreText.Text = fmt.Sprintf("Row %v is a Stone Store at x position %v and y position %v. It is at height %v.", i, Map[i].x, Map[i].y, Map[i].z)
+
+			imgStoneStore := trow.AddNewChild(gi.KiT_Bitmap, fmt.Sprintf("imgStoneStore%v", i)).(*gi.Bitmap)
+			imgStoneStore.OpenImage("stoneStore.jpg", imgSize, imgSize)
+
+			vp.UpdateEnd(updt)
+
+		}	else if Map[i].typeOf == "roundRock" {
+			updt := vp.UpdateStart()
+
+			roundRockText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("roundRockText%v", i)).(*gi.Label)
+			roundRockText.Text = fmt.Sprintf("Row %v is a Round Rock at x position %v and y position %v. It is at height %v.", i, Map[i].x, Map[i].y, Map[i].z)
+
+			imgRock := trow.AddNewChild(gi.KiT_Bitmap, fmt.Sprintf("imgRock%v", i)).(*gi.Bitmap)
+			imgRock.OpenImage("rock.jpg", imgSize, imgSize)
 
 			vp.UpdateEnd(updt)
 
