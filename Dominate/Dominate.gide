@@ -1,0 +1,45 @@
+{
+  "Files": {
+    "DirsOnTop": true
+  },
+  "Editor": {
+    "HiStyle": "emacs",
+    "FontFamily": "Go Mono",
+    "TabSize": 4,
+    "WordWrap": true,
+    "LineNos": true,
+    "Completion": false,
+    "AutoIndent": true
+  },
+  "MainLang": "Go",
+  "VersCtrl": "",
+  "ChangeLog": null,
+  "ProjFilename": "/home/chrx/go/src/github.com/kplat1/Kataform/Dominate/Dominate.gide",
+  "ProjRoot": "/home/chrx/go/src/github.com/kplat1/Kataform/Dominate",
+  "BuildCmds": [
+    "Build Go Proj"
+  ],
+  "BuildDir": "/home/chrx/go/src/github.com/kplat1/Kataform/Dominate",
+  "BuildTarg": "/home/chrx/go/src/github.com/kplat1/Kataform/Dominate",
+  "RunExec": "/home/chrx/go/src/github.com/kplat1/Kataform/Dominate/Dominate",
+  "RunCmds": [
+    "Run Proj"
+  ],
+  "Find": {
+    "Find": "",
+    "Replace": "",
+    "IgnoreCase": false,
+    "Langs": null,
+    "CurFile": false
+  },
+  "Spell": {},
+  "OpenDirs": {},
+  "Register": "",
+  "Splits": [
+    0.1,
+    0.5609,
+    0,
+    0.33910003,
+    0
+  ]
+}
