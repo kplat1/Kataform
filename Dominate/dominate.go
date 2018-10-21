@@ -60,13 +60,14 @@ func mainrun() {
 	oswin.TheApp.SetAbout("This is a simple domination / winner take all game.")
 
 	win := gi.NewWindow2D("game-dominate", "Dominate", width, height, true) // true = pixel sizes
+	
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
 
 	// style sheet
 	var css = ki.Props{
-		"button": ki.Props{
+		"Action": ki.Props{
 			"background-color": gi.Prefs.Colors.Control, // gi.Color{255, 240, 240, 255},
 		},
 		"#combo": ki.Props{
@@ -123,23 +124,38 @@ func mainrun() {
 
 	trow.AddNewChild(gi.KiT_Space, "spc1")
 
+
+
+
+
 	welcomeText := trow.AddNewChild(gi.KiT_Label, "welcomeText").(*gi.Label)
 	welcomeText.Text = "Welcome to Dominate. Fight for control over a 4 by 4 grid."
 	welcomeText.SetProp("text-align", gi.AlignCenter)
 
-	upButton := trow.AddNewChild(gi.KiT_Button, "upButton").(*gi.Button)
-	upButton.Text = "Move up"
+trow.AddNewChild(gi.KiT_Space, "spc1")
 
-	downButton := trow.AddNewChild(gi.KiT_Button, "downButton").(*gi.Button)
-	downButton.Text = "Move down"
-	downButton.Shortcut = "s"
-	
-	
-		rightButton := trow.AddNewChild(gi.KiT_Button, "rightButton").(*gi.Button)
-	rightButton.Text = "Move right"
 
-	leftButton := trow.AddNewChild(gi.KiT_Button, "leftButton").(*gi.Button)
-	leftButton.Text = "Move Left"
+brow := trow.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
+	brow.Lay = gi.LayoutHoriz
+	brow.SetProp("spacing", units.NewValue(2, units.Ex))
+
+	brow.SetProp("horizontal-align", gi.AlignLeft)
+	// brow.SetProp("horizontal-align", gi.AlignJustify)
+	brow.SetStretchMaxWidth()
+
+
+	upAction := brow.AddNewChild(gi.KiT_Action, "upAction").(*gi.Action)
+	upAction.Text = "Move up"
+
+	downAction := brow.AddNewChild(gi.KiT_Action, "downAction").(*gi.Action)
+	downAction.Text = "Move down"
+	downAction.Shortcut = "Alt+s"
+	
+		rightAction := brow.AddNewChild(gi.KiT_Action, "rightAction").(*gi.Action)
+	rightAction.Text = "Move right"
+
+	leftAction := brow.AddNewChild(gi.KiT_Action, "leftAction").(*gi.Action)
+	leftAction.Text = "Move Left"
 	
 	
 
@@ -148,21 +164,19 @@ func mainrun() {
 
 	playingGrid.SetProp("columns", 4)
 
-	upButton.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
-		if sig == int64(gi.ButtonClicked) {
+	upAction.ActionSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		//fmt.Printf("Received Action signal: %v from Action: %v\n", gi.ActionSignals(sig), send.Name())
 			if Players[0].curGrid-4 < 0 {
 
 			} else {
 				Players[0].curGrid -= 4
-				redrawPlayingGrid(playingGrid, Players[0].curGrid+4)
+				redrawPlayingGrid(playingGrid, Players[0].curGrid+4, "up")
 			}
-		}
 	})
 
-	downButton.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
-		if sig == int64(gi.ButtonClicked) {
+	downAction.ActionSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		//fmt.Printf("Received Action signal: %v from Action: %v\n", gi.ActionSignals(sig), send.Name())
+		fmt.Printf("DOWN")
 			if Players[0].curGrid+4 > 15 {
 				fmt.Printf("\n CAN'T MOVE DOWN \n")
 			} else {
@@ -170,37 +184,44 @@ func mainrun() {
 
 				fmt.Printf("\n %v \n", Players[0].curGrid)
 
-				redrawPlayingGrid(playingGrid, Players[0].curGrid-4)
+				redrawPlayingGrid(playingGrid, Players[0].curGrid-4, "down")
 			}
-		}
+		
+		
 	})
 	
 	
-		rightButton.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
-		if sig == int64(gi.ButtonClicked) {
+		rightAction.ActionSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	//	fmt.Printf("Received Action signal: %v from Action: %v\n", gi.ActionSignals(sig), send.Name())
+
 			if Players[0].curGrid + 1 > 15 {
 
 			} else {
 				Players[0].curGrid += 1
-				redrawPlayingGrid(playingGrid, Players[0].curGrid - 1)
-			}
+				redrawPlayingGrid(playingGrid, Players[0].curGrid - 1, "right")
+			
 		}
 	})
 	
-	leftButton.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
-		if sig == int64(gi.ButtonClicked) {
+	leftAction.ActionSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		//fmt.Printf("Received Action signal: %v from Action: %v\n", gi.ActionSignals(sig), send.Name())
+	
 			if Players[0].curGrid - 1 < 0 {
 
 			} else {
 				Players[0].curGrid -= 1
-				redrawPlayingGrid(playingGrid, Players[0].curGrid + 1)
-			}
+				redrawPlayingGrid(playingGrid, Players[0].curGrid + 1, "left")
+			
 		}
 	})
 
+
+win.AddShortcut("Alt+s", downAction)
+
 	drawPlayingGrid(playingGrid)
+	
+	//win.AddShortcut("s", redrawPlayingGrid(playingGrid, Players[0].curGrid, "down"))
+	
 	vp.UpdateEndNoSig(updt)
 
 	win.StartEventLoop()
@@ -252,8 +273,91 @@ if Players[i].name == "you" {
 
 }
 
-func redrawPlayingGrid(playingGrid *gi.Layout, prevCell int) {
+func redrawPlayingGrid(playingGrid *gi.Layout, prevCell int, dir string) {
+  
+  
+  
+  /*if dir == "up" && !(Players[0].curGrid - 4 < 0) {
+	  Players[0].curGrid -= 4
+	} else if dir == "down" && !(Players[0].curGrid + 4 > 15) {
+	  Players[0].curGrid += 4
+	} else if dir == "left" && !(Players[0].curGrid - 1 < 0) {
+	  Players[0].curGrid -= 1
+	} else if dir == "right" && !(Players[0].curGrid + 1 > 15) {
+	  Players[0].curGrid += 1
+	} else if dir == "none" {
+	  } else {
+	  return
+	}
+  */
+  
 	updt := playingGrid.UpdateStart()
+	
+	
+	
+	
+	
+		enemyOldPos := Players[1].curGrid
+	
+	
+	
+	enemyRandomNumber := rand.Intn(4)
+	fmt.Printf("\n RANDOM: %v \n", enemyRandomNumber)
+	
+	var enemyDirection string
+	
+	if enemyRandomNumber == 0 {
+	  enemyDirection = "up"
+	  if enemyOldPos - 4 < 0 {
+	    redrawPlayingGrid(playingGrid, prevCell, "none")
+	  } else {
+	    enemyOldCell := playingGrid.KnownChild(enemyOldPos).(*gi.Frame)
+	enemyOldCell.SetProp("background-color", fmt.Sprintf("%v", Players[1].color))
+	    Players[1].curGrid = enemyOldPos - 4
+	    enemyNewCell := playingGrid.KnownChild(enemyOldPos - 4)
+	  enemyNewCell.SetProp("background-color", fmt.Sprintf("dark%v", Players[1].color))
+	  }
+	  
+	} else if enemyRandomNumber == 1 {
+	  enemyDirection = "down"
+	  if enemyOldPos + 4 > 15 {
+	    redrawPlayingGrid(playingGrid, prevCell, "none")
+	  } else {
+	    enemyOldCell := playingGrid.KnownChild(enemyOldPos).(*gi.Frame)
+	enemyOldCell.SetProp("background-color", fmt.Sprintf("%v", Players[1].color))
+	    Players[1].curGrid = enemyOldPos + 4
+	    enemyNewCell := playingGrid.KnownChild(enemyOldPos + 4)
+	  enemyNewCell.SetProp("background-color", fmt.Sprintf("dark%v", Players[1].color))
+	  }
+	} else if enemyRandomNumber == 2 {
+	  enemyDirection = "left"
+	  
+	  if enemyOldPos - 1 < 0 {
+	    redrawPlayingGrid(playingGrid, prevCell, "none")
+	  } else {
+	    enemyOldCell := playingGrid.KnownChild(enemyOldPos).(*gi.Frame)
+	enemyOldCell.SetProp("background-color", fmt.Sprintf("%v", Players[1].color))
+	    Players[1].curGrid = enemyOldPos - 1
+	    enemyNewCell := playingGrid.KnownChild(enemyOldPos - 1)
+	  enemyNewCell.SetProp("background-color", fmt.Sprintf("dark%v", Players[1].color))
+	  }
+	} else if enemyRandomNumber == 3 {
+	  enemyDirection = "right"
+	  if enemyOldPos + 1 > 15 {
+	    redrawPlayingGrid(playingGrid, prevCell, "none")
+	  } else {
+	    enemyOldCell := playingGrid.KnownChild(enemyOldPos).(*gi.Frame)
+	enemyOldCell.SetProp("background-color", fmt.Sprintf("%v", Players[1].color))
+	    Players[1].curGrid = enemyOldPos + 1
+	    enemyNewCell := playingGrid.KnownChild(enemyOldPos + 1)
+	  enemyNewCell.SetProp("background-color", fmt.Sprintf("dark%v", Players[1].color))
+	  }
+	}
+	fmt.Printf("%v", enemyDirection)
+	
+	
+	
+	
 	for rows := 0; rows < 4; rows++ {
 
 		for cols := 0; cols < 4; cols++ {
@@ -282,63 +386,7 @@ func redrawPlayingGrid(playingGrid *gi.Layout, prevCell int) {
 		}
 	}
 	
-	enemyOldPos := Players[1].curGrid
-	
-	
-	
-	enemyRandomNumber := rand.Intn(4)
-	fmt.Printf("\n RANDOM: %v \n", enemyRandomNumber)
-	
-	var enemyDirection string
-	
-	if enemyRandomNumber == 0 {
-	  enemyDirection = "up"
-	  if enemyOldPos - 4 < 0 {
-	    
-	  } else {
-	    enemyOldCell := playingGrid.KnownChild(enemyOldPos).(*gi.Frame)
-	enemyOldCell.SetProp("background-color", fmt.Sprintf("%v", Players[1].color))
-	    Players[1].curGrid = enemyOldPos - 4
-	    enemyNewCell := playingGrid.KnownChild(enemyOldPos - 4)
-	  enemyNewCell.SetProp("background-color", fmt.Sprintf("dark%v", Players[1].color))
-	  }
-	  
-	} else if enemyRandomNumber == 1 {
-	  enemyDirection = "down"
-	  if enemyOldPos + 4 > 15 {
-	    
-	  } else {
-	    enemyOldCell := playingGrid.KnownChild(enemyOldPos).(*gi.Frame)
-	enemyOldCell.SetProp("background-color", fmt.Sprintf("%v", Players[1].color))
-	    Players[1].curGrid = enemyOldPos + 4
-	    enemyNewCell := playingGrid.KnownChild(enemyOldPos + 4)
-	  enemyNewCell.SetProp("background-color", fmt.Sprintf("dark%v", Players[1].color))
-	  }
-	} else if enemyRandomNumber == 2 {
-	  enemyDirection = "left"
-	  
-	  if enemyOldPos - 1 < 0 {
-	    
-	  } else {
-	    enemyOldCell := playingGrid.KnownChild(enemyOldPos).(*gi.Frame)
-	enemyOldCell.SetProp("background-color", fmt.Sprintf("%v", Players[1].color))
-	    Players[1].curGrid = enemyOldPos - 1
-	    enemyNewCell := playingGrid.KnownChild(enemyOldPos - 1)
-	  enemyNewCell.SetProp("background-color", fmt.Sprintf("dark%v", Players[1].color))
-	  }
-	} else if enemyRandomNumber == 3 {
-	  enemyDirection = "right"
-	  if enemyOldPos + 1 > 15 {
-	    
-	  } else {
-	    enemyOldCell := playingGrid.KnownChild(enemyOldPos).(*gi.Frame)
-	enemyOldCell.SetProp("background-color", fmt.Sprintf("%v", Players[1].color))
-	    Players[1].curGrid = enemyOldPos + 1
-	    enemyNewCell := playingGrid.KnownChild(enemyOldPos + 1)
-	  enemyNewCell.SetProp("background-color", fmt.Sprintf("dark%v", Players[1].color))
-	  }
-	}
-	fmt.Printf("%v", enemyDirection)
+
 	
 	
 	playingGrid.SetFullReRender()
