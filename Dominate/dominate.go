@@ -15,6 +15,7 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
+	"math/rand"
 	//"strconv"
 	//"math
 )
@@ -131,6 +132,7 @@ func mainrun() {
 
 	downButton := trow.AddNewChild(gi.KiT_Button, "downButton").(*gi.Button)
 	downButton.Text = "Move down"
+	downButton.Shortcut = "s"
 	
 	
 		rightButton := trow.AddNewChild(gi.KiT_Button, "rightButton").(*gi.Button)
@@ -234,7 +236,14 @@ func drawPlayingGrid(playingGrid *gi.Layout) {
 			for i := 0; i < len(Players); i++ {
 				if gridPos == Players[i].curGrid {
 
-					cell.SetProp("background-color", fmt.Sprintf("dark%v", Players[i].color))
+
+if Players[i].name == "you" {
+  cell.SetProp("background-color", fmt.Sprintf("light%v", Players[i].color))
+} else {
+  cell.SetProp("background-color", fmt.Sprintf("dark%v", Players[i].color))
+}
+
+					
 				}
 			}
 
@@ -262,7 +271,7 @@ func redrawPlayingGrid(playingGrid *gi.Layout, prevCell int) {
 				if gridPos == Players[0].curGrid {
 					newCell := playingGrid.KnownChild(Players[0].curGrid).(*gi.Frame)
 
-					newCell.SetProp("background-color", fmt.Sprintf("dark%v", Players[0].color))
+					newCell.SetProp("background-color", fmt.Sprintf("light%v", Players[0].color))
 
 					oldCell := playingGrid.KnownChild(prevCell).(*gi.Frame)
 					oldCell.SetProp("background-color", fmt.Sprintf("%v", Players[0].color))
@@ -272,6 +281,66 @@ func redrawPlayingGrid(playingGrid *gi.Layout, prevCell int) {
 
 		}
 	}
+	
+	enemyOldPos := Players[1].curGrid
+	
+	
+	
+	enemyRandomNumber := rand.Intn(4)
+	fmt.Printf("\n RANDOM: %v \n", enemyRandomNumber)
+	
+	var enemyDirection string
+	
+	if enemyRandomNumber == 0 {
+	  enemyDirection = "up"
+	  if enemyOldPos - 4 < 0 {
+	    
+	  } else {
+	    enemyOldCell := playingGrid.KnownChild(enemyOldPos).(*gi.Frame)
+	enemyOldCell.SetProp("background-color", fmt.Sprintf("%v", Players[1].color))
+	    Players[1].curGrid = enemyOldPos - 4
+	    enemyNewCell := playingGrid.KnownChild(enemyOldPos - 4)
+	  enemyNewCell.SetProp("background-color", fmt.Sprintf("dark%v", Players[1].color))
+	  }
+	  
+	} else if enemyRandomNumber == 1 {
+	  enemyDirection = "down"
+	  if enemyOldPos + 4 > 15 {
+	    
+	  } else {
+	    enemyOldCell := playingGrid.KnownChild(enemyOldPos).(*gi.Frame)
+	enemyOldCell.SetProp("background-color", fmt.Sprintf("%v", Players[1].color))
+	    Players[1].curGrid = enemyOldPos + 4
+	    enemyNewCell := playingGrid.KnownChild(enemyOldPos + 4)
+	  enemyNewCell.SetProp("background-color", fmt.Sprintf("dark%v", Players[1].color))
+	  }
+	} else if enemyRandomNumber == 2 {
+	  enemyDirection = "left"
+	  
+	  if enemyOldPos - 1 < 0 {
+	    
+	  } else {
+	    enemyOldCell := playingGrid.KnownChild(enemyOldPos).(*gi.Frame)
+	enemyOldCell.SetProp("background-color", fmt.Sprintf("%v", Players[1].color))
+	    Players[1].curGrid = enemyOldPos - 1
+	    enemyNewCell := playingGrid.KnownChild(enemyOldPos - 1)
+	  enemyNewCell.SetProp("background-color", fmt.Sprintf("dark%v", Players[1].color))
+	  }
+	} else if enemyRandomNumber == 3 {
+	  enemyDirection = "right"
+	  if enemyOldPos + 1 > 15 {
+	    
+	  } else {
+	    enemyOldCell := playingGrid.KnownChild(enemyOldPos).(*gi.Frame)
+	enemyOldCell.SetProp("background-color", fmt.Sprintf("%v", Players[1].color))
+	    Players[1].curGrid = enemyOldPos + 1
+	    enemyNewCell := playingGrid.KnownChild(enemyOldPos + 1)
+	  enemyNewCell.SetProp("background-color", fmt.Sprintf("dark%v", Players[1].color))
+	  }
+	}
+	fmt.Printf("%v", enemyDirection)
+	
+	
 	playingGrid.SetFullReRender()
 	playingGrid.UpdateEnd(updt)
 
