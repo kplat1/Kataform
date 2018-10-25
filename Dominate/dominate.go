@@ -62,6 +62,16 @@ func (df *DomFrame) ConnectEvents2D() {
 		case "s":
 			kt.SetProcessed()
 			df.DownAction()
+		case "w":
+			kt.SetProcessed()
+			df.UpAction()
+		case "a":
+			kt.SetProcessed()
+			df.LeftAction()
+		case "d":
+			kt.SetProcessed()
+			df.RightAction()
+
 		}
 	})
 }
@@ -75,7 +85,21 @@ func (df *DomFrame) DownAction() {
 	down, _ := df.ButtonRow.ChildByName("downAction", 0)
 	down.(*gi.Action).Trigger()
 }
-
+func (df *DomFrame) UpAction() {
+	fmt.Printf("Up action!!\n")
+	up, _ := df.ButtonRow.ChildByName("upAction", 0)
+	up.(*gi.Action).Trigger()
+}
+func (df *DomFrame) LeftAction() {
+	fmt.Printf("Left action!!\n")
+	left, _ := df.ButtonRow.ChildByName("leftAction", 0)
+	left.(*gi.Action).Trigger()
+}
+func (df *DomFrame) RightAction() {
+	fmt.Printf("Right action!!\n")
+	right, _ := df.ButtonRow.ChildByName("rightAction", 0)
+	right.(*gi.Action).Trigger()
+}
 func mainrun() {
 	width := 1024
 	height := 768
