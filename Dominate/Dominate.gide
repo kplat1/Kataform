@@ -9,10 +9,12 @@
     "WordWrap": true,
     "LineNos": true,
     "Completion": false,
-    "AutoIndent": true
+    "AutoIndent": true,
+    "EmacsUndo": false
   },
+  "SplitName": "",
   "MainLang": "Go",
-  "VersCtrl": "",
+  "VersCtrl": "Git",
   "ChangeLog": null,
   "ProjFilename": "/home/chrx/go/src/github.com/kplat1/Kataform/Dominate/Dominate.gide",
   "ProjRoot": "/home/chrx/go/src/github.com/kplat1/Kataform/Dominate",

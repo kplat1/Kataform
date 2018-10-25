@@ -15,8 +15,10 @@ import (
 
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
+	"github.com/goki/ki/kit"
 	//"strconv"
 	//"math
 )
@@ -43,6 +45,36 @@ type player struct {
 }
 
 var Players []player
+
+type DomFrame struct {
+	gi.Frame
+	ButtonRow *gi.Layout
+}
+
+var KiT_DomFrame = kit.Types.AddType(&DomFrame{}, nil)
+
+func (df *DomFrame) ConnectEvents2D() {
+	df.ConnectEvent(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		// fvv := recv.Embed(KiT_DomFrame).(*DomFrame)
+		kt := d.(*key.ChordEvent)
+		ch := kt.Chord()
+		switch ch {
+		case "s":
+			kt.SetProcessed()
+			df.DownAction()
+		}
+	})
+}
+
+func (df *DomFrame) HasFocus2D() bool {
+	return true // always.. we're typically a dialog anyway
+}
+
+func (df *DomFrame) DownAction() {
+	fmt.Printf("Down action!!\n")
+	down, _ := df.ButtonRow.ChildByName("downAction", 0)
+	down.(*gi.Action).Trigger()
+}
 
 func mainrun() {
 	width := 1024
@@ -83,11 +115,12 @@ func mainrun() {
 	vp.CSS = css
 
 	mfr := win.SetMainFrame()
-	mfr.SetProp("spacing", units.NewValue(1, units.Ex))
+	dfr := mfr.AddNewChild(KiT_DomFrame, "domframe").(*DomFrame)
+	dfr.SetProp("spacing", units.NewValue(1, units.Ex))
 	// mfr.SetProp("background-color", "linear-gradient(to top, red, lighter-80)")
-	// mfr.SetProp("background-color", "linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)")
-	// mfr.SetProp("background-color", "linear-gradient(to right, rgba(255,0,0,0), rgba(255,0,0,1))")
-	// mfr.SetProp("background-color", "radial-gradient(red, lighter-80)")
+	// dfr.SetProp("background-color", "linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)")
+	// dfr.SetProp("background-color", "linear-gradient(to right, rgba(255,0,0,0), rgba(255,0,0,1))")
+	// dfr.SetProp("background-color", "radial-gradient(red, lighter-80)")
 
 	// vars in here :
 
@@ -106,7 +139,7 @@ func mainrun() {
 
 	// end of vars
 
-	trow := mfr.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
+	trow := dfr.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
 	trow.Lay = gi.LayoutVert
 	trow.SetStretchMaxWidth()
 
@@ -130,26 +163,29 @@ func mainrun() {
 
 	trow.AddNewChild(gi.KiT_Space, "spc1")
 
-	brow := trow.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
-	brow.Lay = gi.LayoutHoriz
-	brow.SetProp("spacing", units.NewValue(2, units.Ex))
+	dfr.ButtonRow = trow.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
+	dfr.ButtonRow.Lay = gi.LayoutHoriz
+	dfr.ButtonRow.SetProp("spacing", units.NewValue(2, units.Ex))
 
-	brow.SetProp("horizontal-align", gi.AlignLeft)
-	// brow.SetProp("horizontal-align", gi.AlignJustify)
-	brow.SetStretchMaxWidth()
+	dfr.ButtonRow.SetProp("horizontal-align", gi.AlignLeft)
+	// dfr.ButtonRow.SetProp("horizontal-align", gi.AlignJustify)
+	dfr.ButtonRow.SetStretchMaxWidth()
 
-	upAction := brow.AddNewChild(gi.KiT_Action, "upAction").(*gi.Action)
+	upAction := dfr.ButtonRow.AddNewChild(gi.KiT_Action, "upAction").(*gi.Action)
 	upAction.Text = "Move up"
+	upAction.Shortcut = "Alt+W"
 
-	downAction := brow.AddNewChild(gi.KiT_Action, "downAction").(*gi.Action)
+	downAction := dfr.ButtonRow.AddNewChild(gi.KiT_Action, "downAction").(*gi.Action)
 	downAction.Text = "Move down"
-	downAction.Shortcut = "s"
+	downAction.Shortcut = "Alt+S"
 
-	rightAction := brow.AddNewChild(gi.KiT_Action, "rightAction").(*gi.Action)
+	rightAction := dfr.ButtonRow.AddNewChild(gi.KiT_Action, "rightAction").(*gi.Action)
 	rightAction.Text = "Move right"
+	rightAction.Shortcut = "Alt+D"
 
-	leftAction := brow.AddNewChild(gi.KiT_Action, "leftAction").(*gi.Action)
+	leftAction := dfr.ButtonRow.AddNewChild(gi.KiT_Action, "leftAction").(*gi.Action)
 	leftAction.Text = "Move Left"
+	leftAction.Shortcut = "Alt+A"
 
 	playingGrid := trow.AddNewChild(gi.KiT_Layout, "playingGrid").(*gi.Layout)
 	playingGrid.Lay = gi.LayoutGrid
@@ -205,7 +241,10 @@ func mainrun() {
 		}
 	})
 
-	win.AddShortcut("s", downAction)
+	win.AddShortcut("Alt+S", downAction)
+	win.AddShortcut("Alt+W", upAction)
+	win.AddShortcut("Alt+D", rightAction)
+	win.AddShortcut("Alt+A", leftAction)
 
 	drawPlayingGrid(playingGrid)
 
