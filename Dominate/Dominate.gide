@@ -12,19 +12,10 @@
     "AutoIndent": true,
     "EmacsUndo": false
   },
-  "SplitName": "",
+  "SplitName": "Small",
   "MainLang": "Go",
-  "VersCtrl": "Git",
-  "ChangeLog": [
-    {
-      "Date": "2018-10-24T20:37:22.567743827-06:00",
-      "CommitID": "",
-      "Author": "",
-      "Email": "",
-      "Message": "domframe and down button s",
-      "Files": ""
-    }
-  ],
+  "VersCtrl": "",
+  "ChangeLog": null,
   "ProjFilename": "/home/chrx/go/src/github.com/kplat1/Kataform/Dominate/Dominate.gide",
   "ProjRoot": "/home/chrx/go/src/github.com/kplat1/Kataform/Dominate",
   "BuildCmds": [

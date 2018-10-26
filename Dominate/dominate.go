@@ -71,6 +71,12 @@ func (df *DomFrame) ConnectEvents2D() {
 		case "d":
 			kt.SetProcessed()
 			df.RightAction()
+		case "1":
+			kt.SetProcessed()
+			df.ModeAttackAction()
+		case "2":
+			kt.SetProcessed()
+			df.ModeDefenseAction()
 
 		}
 	})
@@ -100,6 +106,21 @@ func (df *DomFrame) RightAction() {
 	right, _ := df.ButtonRow.ChildByName("rightAction", 0)
 	right.(*gi.Action).Trigger()
 }
+
+func (df *DomFrame) ModeAttackAction() {
+	fmt.Printf("Mode attack action!!\n")
+	modeAttack, _ := df.ButtonRow.ChildByName("modeAttackAction", 0)
+	modeAttack.(*gi.Action).Trigger()
+}
+
+func (df *DomFrame) ModeDefenseAction() {
+	fmt.Printf("Mode defense action!!\n")
+	modeDefense, _ := df.ButtonRow.ChildByName("modeDefenseAction", 0)
+	modeDefense.(*gi.Action).Trigger()
+}
+
+var currentMode string = "none"
+
 func mainrun() {
 	width := 1024
 	height := 768
@@ -195,21 +216,31 @@ func mainrun() {
 	// dfr.ButtonRow.SetProp("horizontal-align", gi.AlignJustify)
 	dfr.ButtonRow.SetStretchMaxWidth()
 
+	dfr.SetProp("background-color", "white")
+
 	upAction := dfr.ButtonRow.AddNewChild(gi.KiT_Action, "upAction").(*gi.Action)
 	upAction.Text = "Move up"
-	upAction.Shortcut = "Alt+W"
+	upAction.Shortcut = "W"
 
 	downAction := dfr.ButtonRow.AddNewChild(gi.KiT_Action, "downAction").(*gi.Action)
 	downAction.Text = "Move down"
-	downAction.Shortcut = "Alt+S"
+	downAction.Shortcut = "S"
 
 	rightAction := dfr.ButtonRow.AddNewChild(gi.KiT_Action, "rightAction").(*gi.Action)
 	rightAction.Text = "Move right"
-	rightAction.Shortcut = "Alt+D"
+	rightAction.Shortcut = "D"
 
 	leftAction := dfr.ButtonRow.AddNewChild(gi.KiT_Action, "leftAction").(*gi.Action)
 	leftAction.Text = "Move Left"
-	leftAction.Shortcut = "Alt+A"
+	leftAction.Shortcut = "A"
+
+	modeAttackAction := dfr.ButtonRow.AddNewChild(gi.KiT_Action, "modeAttackAction").(*gi.Action)
+	modeAttackAction.Text = "Set mode to attack"
+	modeAttackAction.Shortcut = "1"
+
+	modeDefenseAction := dfr.ButtonRow.AddNewChild(gi.KiT_Action, "modeDefenseAction").(*gi.Action)
+	modeDefenseAction.Text = "Set mode to defend"
+	modeDefenseAction.Shortcut = "2"
 
 	playingGrid := trow.AddNewChild(gi.KiT_Layout, "playingGrid").(*gi.Layout)
 	playingGrid.Lay = gi.LayoutGrid
@@ -263,6 +294,26 @@ func mainrun() {
 			redrawPlayingGrid(playingGrid, Players[0].curGrid+1, "left")
 
 		}
+	})
+
+	modeAttackAction.ActionSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		//fmt.Printf("Received Action signal: %v from Action: %v\n", gi.ActionSignals(sig), send.Name())
+
+		fmt.Printf("Change mode to attack")
+
+		currentMode = "attack"
+		fmt.Printf("Current mode is %v \n", currentMode)
+
+	})
+
+	modeDefenseAction.ActionSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		//fmt.Printf("Received Action signal: %v from Action: %v\n", gi.ActionSignals(sig), send.Name())
+
+		fmt.Printf("Change mode to defense")
+
+		currentMode = "defense"
+		fmt.Printf("Current mode is %v \n", currentMode)
+
 	})
 
 	win.AddShortcut("Alt+S", downAction)
@@ -372,9 +423,12 @@ func redrawPlayingGrid(playingGrid *gi.Layout, prevCell int, dir string) {
 		} else {
 			enemyOldCell := playingGrid.KnownChild(enemyOldPos).(*gi.Frame)
 			enemyOldCell.SetProp("background-color", fmt.Sprintf("%v", Players[1].color))
+
 			Players[1].curGrid = enemyOldPos - 4
 			enemyNewCell := playingGrid.KnownChild(enemyOldPos - 4)
 			enemyNewCell.SetProp("background-color", fmt.Sprintf("dark%v", Players[1].color))
+			Grid[enemyOldPos-4].color = fmt.Sprintf("dark%v", Players[1].color)
+			Grid[enemyOldPos].color = Players[1].color
 		}
 
 	} else if enemyRandomNumber == 1 {
@@ -387,6 +441,8 @@ func redrawPlayingGrid(playingGrid *gi.Layout, prevCell int, dir string) {
 			Players[1].curGrid = enemyOldPos + 4
 			enemyNewCell := playingGrid.KnownChild(enemyOldPos + 4)
 			enemyNewCell.SetProp("background-color", fmt.Sprintf("dark%v", Players[1].color))
+			Grid[enemyOldPos+4].color = fmt.Sprintf("dark%v", Players[1].color)
+			Grid[enemyOldPos].color = Players[1].color
 		}
 	} else if enemyRandomNumber == 2 {
 		enemyDirection = "left"
@@ -399,6 +455,8 @@ func redrawPlayingGrid(playingGrid *gi.Layout, prevCell int, dir string) {
 			Players[1].curGrid = enemyOldPos - 1
 			enemyNewCell := playingGrid.KnownChild(enemyOldPos - 1)
 			enemyNewCell.SetProp("background-color", fmt.Sprintf("dark%v", Players[1].color))
+			Grid[enemyOldPos-1].color = fmt.Sprintf("dark%v", Players[1].color)
+			Grid[enemyOldPos].color = Players[1].color
 		}
 	} else if enemyRandomNumber == 3 {
 		enemyDirection = "right"
@@ -410,6 +468,8 @@ func redrawPlayingGrid(playingGrid *gi.Layout, prevCell int, dir string) {
 			Players[1].curGrid = enemyOldPos + 1
 			enemyNewCell := playingGrid.KnownChild(enemyOldPos + 1)
 			enemyNewCell.SetProp("background-color", fmt.Sprintf("dark%v", Players[1].color))
+			Grid[enemyOldPos+1].color = fmt.Sprintf("dark%v", Players[1].color)
+			Grid[enemyOldPos].color = Players[1].color
 		}
 	}
 	fmt.Printf("%v", enemyDirection)
@@ -418,22 +478,48 @@ func redrawPlayingGrid(playingGrid *gi.Layout, prevCell int, dir string) {
 
 		for cols := 0; cols < 4; cols++ {
 
+			//fmt.Printf("\n  GRID POS : %v  \n", gridPos)
+
+			//fmt.Printf("    ROWS :     %v       COLS :    %v    POS :  %v     \n ", rows, cols, gridPos)
+
+			//fmt.Printf("    GRID LENGTH :  %v     ", len(Grid))
 			gridPos := ((cols + 1) + rows*4) - 1
-
-			fmt.Printf("\n  GRID POS : %v  \n", gridPos)
-
-			fmt.Printf("    ROWS :     %v       COLS :    %v    POS :  %v     \n ", rows, cols, gridPos)
-
-			fmt.Printf("    GRID LENGTH :  %v     ", len(Grid))
-
 			if gridPos == Players[0].curGrid {
-				newCell := playingGrid.KnownChild(Players[0].curGrid).(*gi.Frame)
 
-				newCell.SetProp("background-color", fmt.Sprintf("light%v", Players[0].color))
+				fmt.Printf("\n CURRENT MODE: %v \n", currentMode)
 
-				oldCell := playingGrid.KnownChild(prevCell).(*gi.Frame)
-				oldCell.SetProp("background-color", fmt.Sprintf("%v", Players[0].color))
+				if currentMode == "attack" {
 
+					Players[0].curGrid = gridPos
+					newCell := playingGrid.KnownChild(Players[0].curGrid).(*gi.Frame)
+
+					newCell.SetProp("background-color", fmt.Sprintf("light%v", Players[0].color))
+
+					oldCell := playingGrid.KnownChild(prevCell).(*gi.Frame)
+					oldCell.SetProp("background-color", fmt.Sprintf("%v", Players[0].color))
+					Grid[gridPos].color = fmt.Sprintf("dark%v", Players[0].color)
+					Grid[prevCell].color = Players[0].color
+				} else if currentMode == "defense" {
+					if Grid[gridPos].color == "green" {
+						Players[0].curGrid = gridPos
+						newCell := playingGrid.KnownChild(Players[0].curGrid).(*gi.Frame)
+
+						newCell.SetProp("background-color", fmt.Sprintf("light%v", Players[0].color))
+
+						oldCell := playingGrid.KnownChild(prevCell).(*gi.Frame)
+						oldCell.SetProp("background-color", fmt.Sprintf("%v", Players[0].color))
+						Grid[gridPos].color = fmt.Sprintf("dark%v", Players[0].color)
+						Grid[prevCell].color = Players[0].color
+					} else {
+						gridPos = prevCell
+						Players[0].curGrid = prevCell
+					}
+
+				} else {
+					gridPos = prevCell
+					Players[0].curGrid = prevCell
+
+				}
 			}
 
 		}
