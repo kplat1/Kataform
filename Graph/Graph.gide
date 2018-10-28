@@ -1,0 +1,47 @@
+{
+  "Files": {
+    "DirsOnTop": true
+  },
+  "Editor": {
+    "HiStyle": "emacs",
+    "FontFamily": "Go Mono",
+    "TabSize": 4,
+    "WordWrap": true,
+    "LineNos": true,
+    "Completion": true,
+    "AutoIndent": true,
+    "EmacsUndo": false
+  },
+  "SplitName": "Small",
+  "MainLang": "Go",
+  "VersCtrl": "",
+  "ChangeLog": null,
+  "ProjFilename": "/home/chrx/go/src/github.com/kplat1/Kataform/Graph/Graph.gide",
+  "ProjRoot": "/home/chrx/go/src/github.com/kplat1/Kataform/Graph",
+  "BuildCmds": [
+    "Build Go Proj"
+  ],
+  "BuildDir": "/home/chrx/go/src/github.com/kplat1/Kataform/Graph",
+  "BuildTarg": "/home/chrx/go/src/github.com/kplat1/Kataform/Graph",
+  "RunExec": "/home/chrx/go/src/github.com/kplat1/Kataform/Graph/Graph",
+  "RunCmds": [
+    "Run Proj"
+  ],
+  "Find": {
+    "Find": "",
+    "Replace": "",
+    "IgnoreCase": false,
+    "Langs": null,
+    "CurFile": false
+  },
+  "Spell": {},
+  "OpenDirs": {},
+  "Register": "",
+  "Splits": [
+    0.1,
+    0.5609,
+    0,
+    0.33910003,
+    0
+  ]
+}
