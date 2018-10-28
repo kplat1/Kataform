@@ -8,7 +8,7 @@
     "TabSize": 4,
     "WordWrap": true,
     "LineNos": true,
-    "Completion": true,
+    "Completion": false,
     "AutoIndent": true,
     "EmacsUndo": false
   },

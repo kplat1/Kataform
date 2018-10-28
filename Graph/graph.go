@@ -6,14 +6,35 @@ import (
 	//"github.com/goki/gi/complete"
 
 	"fmt"
+	"log"
+	"math"
 
-	"github.com/chewxy/math32"
+	"github.com/Knetic/govaluate"
 	"github.com/goki/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/svg"
 	"github.com/goki/ki"
 )
+
+var graph *svg.SVG
+var gmin, gmax, gsz, ginc gi.Vec2D
+var sz float32
+
+var functions = map[string]govaluate.ExpressionFunction{
+	"cos": func(args ...interface{}) (interface{}, error) {
+		y := math.Cos(args[0].(float64))
+		return y, nil
+	},
+	"sin": func(args ...interface{}) (interface{}, error) {
+		y := math.Sin(args[0].(float64))
+		return y, nil
+	},
+	"tan": func(args ...interface{}) (interface{}, error) {
+		y := math.Tan(args[0].(float64))
+		return y, nil
+	},
+}
 
 func main() {
 
@@ -83,6 +104,7 @@ func mainrun() {
 
 	graphingInput := mfr.AddNewChild(gi.KiT_TextField, "graphingInput").(*gi.TextField)
 	graphingInput.Placeholder = "Enter your equation"
+	graphingInput.SetProp("min-width", "200px")
 
 	submitGraphingInput := mfr.AddNewChild(gi.KiT_Button, "submitGraphingInput").(*gi.Button)
 	submitGraphingInput.Text = "Graph equation"
@@ -90,22 +112,25 @@ func mainrun() {
 		if sig == int64(gi.ButtonClicked) {
 			updt := vp.UpdateStart()
 
-			graphResult := mfr.AddNewChild(gi.KiT_Label, "graphResult").(*gi.Label)
-			graphResult.Text = fmt.Sprintf("Your equation is: %v", graphingInput.Text())
+			//graphResult := mfr.AddNewChild(gi.KiT_Label, "graphResult").(*gi.Label)
+			//graphResult.Text = fmt.Sprintf("Your equation is: %v", graphingInput.Text())
+
+			Graph(graphingInput.Text())
 
 			vp.UpdateEnd(updt)
 		}
 	})
+	frame := mfr.AddNewChild(gi.KiT_Frame, "frame").(*gi.Frame)
 
-	graph := mfr.AddNewChild(svg.KiT_SVG, "graph").(*svg.SVG)
-	sz := float32(800)
-	graph.SetProp("width", sz)
-	graph.SetProp("height", sz)
+	graph = frame.AddNewChild(svg.KiT_SVG, "graph").(*svg.SVG)
+	sz = float32(800)
+	graph.SetProp("min-width", sz)
+	graph.SetProp("min-height", sz)
 
-	gmin := gi.Vec2D{-10, -10}
-	gmax := gi.Vec2D{10, 10}
-	gsz := gmax.Sub(gmin)
-	ginc := gsz.DivVal(100)
+	gmin = gi.Vec2D{-10, -10}
+	gmax = gi.Vec2D{10, 10}
+	gsz = gmax.Sub(gmin)
+	ginc = gsz.DivVal(100)
 
 	graph.ViewBox.Min = gmin
 	graph.ViewBox.Size = gsz
@@ -113,21 +138,6 @@ func mainrun() {
 	graph.Fill = true
 	graph.SetProp("background-color", "white")
 	graph.SetProp("stroke-width", "1pct")
-
-	path1 := graph.AddNewChild(svg.KiT_Path, "path1").(*svg.Path)
-	path1.SetProp("fill", "none")
-	ps := ""
-	start := true
-	for x := gmin.X; x < gmax.X; x += ginc.X {
-		y := 5 * math32.Cos(x)
-		if start {
-			ps += fmt.Sprintf("M %v %v ", x-gmin.X, y-gmin.Y)
-			start = false
-		} else {
-			ps += fmt.Sprintf("L %v %v ", x-gmin.X, y-gmin.Y)
-		}
-	}
-	path1.SetData(ps)
 
 	//////////////////////////////////////////
 	//      Main Menu
@@ -149,5 +159,37 @@ func mainrun() {
 	vp.UpdateEndNoSig(updt)
 
 	win.StartEventLoop()
+
+}
+
+func Graph(exstr string) {
+	path1 := graph.AddNewChild(svg.KiT_Path, "path1").(*svg.Path)
+	path1.SetProp("fill", "none")
+	//path1.SetProp("transform", "scale(1 -1)")
+
+	expr, err := govaluate.NewEvaluableExpressionWithFunctions(exstr, functions)
+
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	params := make(map[string]interface{}, 8)
+	params["x"] = float64(0)
+	ps := ""
+	start := true
+	for x := gmin.X; x < gmax.X; x += ginc.X {
+		params["x"] = x
+		yi, _ := expr.Evaluate(params)
+		y := float32(yi.(float64))
+		if start {
+			ps += fmt.Sprintf("M %v %v ", x-gmin.X, y-gmin.Y)
+
+			start = false
+		} else {
+			ps += fmt.Sprintf("L %v %v ", x-gmin.X, y-gmin.Y)
+		}
+	}
+	path1.SetData(ps)
 
 }
