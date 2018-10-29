@@ -14,6 +14,7 @@ import (
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/svg"
+	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 )
 
@@ -106,9 +107,17 @@ func mainrun() {
 	graphingInput.Placeholder = "Enter your equation"
 	graphingInput.SetProp("min-width", "200px")
 
-	submitGraphingInput := mfr.AddNewChild(gi.KiT_Button, "submitGraphingInput").(*gi.Button)
+	brow := mfr.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
+	brow.Lay = gi.LayoutHoriz
+	brow.SetProp("spacing", units.NewValue(2, units.Ex))
+
+	brow.SetProp("horizontal-align", gi.AlignLeft)
+	// brow.SetProp("horizontal-align", gi.AlignJustify)
+	brow.SetStretchMaxWidth()
+
+	submitGraphingInput := brow.AddNewChild(gi.KiT_Button, "submitGraphingInput").(*gi.Button)
 	submitGraphingInput.Text = "Graph equation"
-	submitGraphingInput.ButtonSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	submitGraphingInput.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
 			updt := vp.UpdateStart()
 
@@ -120,6 +129,19 @@ func mainrun() {
 			vp.UpdateEnd(updt)
 		}
 	})
+
+	resetGraphButton := brow.AddNewChild(gi.KiT_Button, "resetGraphButton").(*gi.Button)
+	resetGraphButton.Text = "Reset graph"
+	resetGraphButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			updt := vp.UpdateStart()
+
+			initGraph()
+
+			vp.UpdateEnd(updt)
+		}
+	})
+
 	frame := mfr.AddNewChild(gi.KiT_Frame, "frame").(*gi.Frame)
 
 	graph = frame.AddNewChild(svg.KiT_SVG, "graph").(*svg.SVG)
@@ -138,6 +160,7 @@ func mainrun() {
 	graph.Fill = true
 	graph.SetProp("background-color", "white")
 	graph.SetProp("stroke-width", "1pct")
+	//initGraph()
 
 	//////////////////////////////////////////
 	//      Main Menu
@@ -181,15 +204,29 @@ func Graph(exstr string) {
 	for x := gmin.X; x < gmax.X; x += ginc.X {
 		params["x"] = x
 		yi, _ := expr.Evaluate(params)
-		y := float32(yi.(float64))
+		y := float32(-yi.(float64))
 		if start {
-			ps += fmt.Sprintf("M %v %v ", x-gmin.X, y-gmin.Y)
+			ps += fmt.Sprintf("M %v %v ", x, y)
 
 			start = false
 		} else {
-			ps += fmt.Sprintf("L %v %v ", x-gmin.X, y-gmin.Y)
+			ps += fmt.Sprintf("L %v %v ", x, y)
 		}
 	}
 	path1.SetData(ps)
+
+}
+
+func initGraph() {
+
+	graph.DeleteAll()
+
+	xAxis := graph.AddNewChild(svg.KiT_Line, "xAxis").(*svg.Line)
+	xAxis.Start = gi.Vec2D{-10, 0}
+	xAxis.End = gi.Vec2D{10, 0}
+
+	yAxis := graph.AddNewChild(svg.KiT_Line, "yAxis").(*svg.Line)
+	yAxis.Start = gi.Vec2D{0, -10}
+	yAxis.End = gi.Vec2D{0, 10}
 
 }
