@@ -39,6 +39,17 @@ var functions = map[string]govaluate.ExpressionFunction{
 		y := math.Pow(args[0].(float64), args[1].(float64))
 		return y, nil
 	},
+	"abs": func(args ...interface{}) (interface{}, error) {
+		y := math.Abs(args[0].(float64))
+		return y, nil
+	},
+
+	"fact": func(args ...interface{}) (interface{}, error) {
+
+		y := FactorialMemoization(int(args[0].(float64)))
+
+		return y, nil
+	},
 }
 
 var lineNo = 0
@@ -103,7 +114,7 @@ func mainrun() {
 
 	graphingInput := mfr.AddNewChild(gi.KiT_TextField, "graphingInput").(*gi.TextField)
 	graphingInput.Placeholder = "Enter your equation"
-	graphingInput.SetProp("min-width", "200px")
+	graphingInput.SetProp("min-width", "100ch")
 	graphingInput.TextFieldSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.TextFieldDone) {
 			updt := vp.UpdateStart()
@@ -245,4 +256,27 @@ func InitGraph() {
 	yAxis.End = gi.Vec2D{0, 10}
 	yAxis.SetProp("stroke", "#888")
 
+}
+
+const LIM = 100
+
+var facts [LIM]float64
+
+func FactorialMemoization(n int) (res float64) {
+
+	if n < 0 {
+		return 1
+	}
+
+	if facts[n] != 0 {
+		res = facts[n]
+		return res
+	}
+
+	if n > 0 {
+		res = float64(n) * FactorialMemoization(n-1)
+		return res
+	}
+
+	return 1
 }
