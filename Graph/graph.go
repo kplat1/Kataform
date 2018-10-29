@@ -35,7 +35,14 @@ var functions = map[string]govaluate.ExpressionFunction{
 		y := math.Tan(args[0].(float64))
 		return y, nil
 	},
+	"pow": func(args ...interface{}) (interface{}, error) {
+		y := math.Pow(args[0].(float64), args[1].(float64))
+		return y, nil
+	},
 }
+
+var lineNo = 0
+var colors = []string{"black", "red", "blue", "green", "purple", "brown", "orange"}
 
 func main() {
 
@@ -43,6 +50,7 @@ func main() {
 		mainrun()
 	})
 }
+
 func mainrun() {
 	width := 1024
 	height := 768
@@ -57,7 +65,7 @@ func mainrun() {
 	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
 
 	oswin.TheApp.SetName("Graphing")
-	oswin.TheApp.SetAbout("This is a graphing app.")
+	oswin.TheApp.SetAbout("Graphing is an app that will allow you to enter equations and have them be graphed. There will also be other modes where you can have marbles fall or things like that.")
 
 	win := gi.NewWindow2D("graph", "Graphing App", width, height, true) // true = pixel sizes
 
@@ -91,21 +99,23 @@ func mainrun() {
 	title.SetProp("font-family", "Times New Roman, serif")
 	title.SetProp("font-size", "x-large")
 	// title.SetProp("letter-spacing", 2)
-	title.SetProp("line-height", 1.5)
-	title.SetStretchMaxWidth()
-	title.SetStretchMaxHeight()
-
-	aboutText := mfr.AddNewChild(gi.KiT_Label, "aboutText").(*gi.Label)
-	aboutText.Text = "Graphing is an app that will allow you to enter equations and have them be graphed. There will also be other modes where you can have marbles fall or things like that."
-	aboutText.SetProp("white-space", gi.WhiteSpaceNormal) // wrap
-	aboutText.SetProp("text-align", gi.AlignCenter)       // note: this also sets horizontal-align, which controls the "box" that the text is rendered in..
-
-	aboutText.SetStretchMaxWidth()
-	aboutText.SetStretchMaxHeight()
+	// title.SetStretchMaxWidth()
 
 	graphingInput := mfr.AddNewChild(gi.KiT_TextField, "graphingInput").(*gi.TextField)
 	graphingInput.Placeholder = "Enter your equation"
 	graphingInput.SetProp("min-width", "200px")
+	graphingInput.TextFieldSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.TextFieldDone) {
+			updt := vp.UpdateStart()
+
+			//graphResult := mfr.AddNewChild(gi.KiT_Label, "graphResult").(*gi.Label)
+			//graphResult.Text = fmt.Sprintf("Your equation is: %v", graphingInput.Text())
+
+			Graph(graphingInput.Text())
+
+			vp.UpdateEnd(updt)
+		}
+	})
 
 	brow := mfr.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
 	brow.Lay = gi.LayoutHoriz
@@ -136,7 +146,7 @@ func mainrun() {
 		if sig == int64(gi.ButtonClicked) {
 			updt := vp.UpdateStart()
 
-			initGraph()
+			InitGraph()
 
 			vp.UpdateEnd(updt)
 		}
@@ -148,19 +158,22 @@ func mainrun() {
 	sz = float32(800)
 	graph.SetProp("min-width", sz)
 	graph.SetProp("min-height", sz)
+	graph.SetStretchMaxWidth()
+	graph.SetStretchMaxHeight()
 
 	gmin = gi.Vec2D{-10, -10}
 	gmax = gi.Vec2D{10, 10}
 	gsz = gmax.Sub(gmin)
-	ginc = gsz.DivVal(100)
+	ginc = gsz.DivVal(sz)
 
 	graph.ViewBox.Min = gmin
 	graph.ViewBox.Size = gsz
 	graph.Norm = true
 	graph.Fill = true
 	graph.SetProp("background-color", "white")
-	graph.SetProp("stroke-width", "1pct")
-	//initGraph()
+	graph.SetProp("stroke-width", ".2pct")
+
+	InitGraph()
 
 	//////////////////////////////////////////
 	//      Main Menu
@@ -188,7 +201,8 @@ func mainrun() {
 func Graph(exstr string) {
 	path1 := graph.AddNewChild(svg.KiT_Path, "path1").(*svg.Path)
 	path1.SetProp("fill", "none")
-	//path1.SetProp("transform", "scale(1 -1)")
+	clr := colors[lineNo%len(colors)]
+	path1.SetProp("stroke", clr)
 
 	expr, err := govaluate.NewEvaluableExpressionWithFunctions(exstr, functions)
 
@@ -214,19 +228,21 @@ func Graph(exstr string) {
 		}
 	}
 	path1.SetData(ps)
-
+	lineNo++
 }
 
-func initGraph() {
+func InitGraph() {
 
-	graph.DeleteAll()
+	graph.DeleteChildren(true)
 
 	xAxis := graph.AddNewChild(svg.KiT_Line, "xAxis").(*svg.Line)
 	xAxis.Start = gi.Vec2D{-10, 0}
 	xAxis.End = gi.Vec2D{10, 0}
+	xAxis.SetProp("stroke", "#888")
 
 	yAxis := graph.AddNewChild(svg.KiT_Line, "yAxis").(*svg.Line)
 	yAxis.Start = gi.Vec2D{0, -10}
 	yAxis.End = gi.Vec2D{0, 10}
+	yAxis.SetProp("stroke", "#888")
 
 }
