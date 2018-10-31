@@ -17,6 +17,14 @@
   "VersCtrl": "Git",
   "ChangeLog": [
     {
+      "Date": "2018-10-30T20:48:29.238685719-06:00",
+      "CommitID": "",
+      "Author": "",
+      "Email": "",
+      "Message": "Added angles - still not working well with bouncing.",
+      "Files": ""
+    },
+    {
       "Date": "2018-10-30T19:43:01.499885191-06:00",
       "CommitID": "",
       "Author": "",
@@ -41,7 +49,9 @@
     "Replace": "",
     "IgnoreCase": false,
     "Langs": null,
-    "CurFile": false
+    "Loc": "FindLocAll",
+    "FindHist": null,
+    "ReplHist": null
   },
   "Spell": {},
   "OpenDirs": {},

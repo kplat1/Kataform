@@ -195,7 +195,9 @@ func mainrun() {
 	stopMarbles.Text = "Stop"
 	stopMarbles.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
+
 			Stop = true
+			fmt.Printf("Stop is: %v \n", Stop)
 		}
 	})
 
@@ -254,12 +256,12 @@ func Graph(exstr string) {
 	path1.SetProp("stroke", clr)
 
 	expr, err := govaluate.NewEvaluableExpressionWithFunctions(exstr, functions)
-	Lines = append(Lines, expr)
 
 	if err != nil {
 		log.Println(err)
 		return
 	}
+	Lines = append(Lines, expr)
 
 	params := make(map[string]interface{}, 8)
 	params["x"] = float64(0)
@@ -318,6 +320,11 @@ func InitGraph() {
 	}
 
 }
+
+func RadToDeg(rad float32) float32 {
+	return rad * 180 / math.Pi
+}
+
 func UpdateMarbles() {
 	updt := vp.UpdateStart()
 	params := make(map[string]interface{}, 8)
@@ -327,6 +334,9 @@ func UpdateMarbles() {
 		m.Pos = m.Pos.Add(m.Vel)
 
 		for _, ln := range Lines {
+			if ln == nil {
+				continue
+			}
 
 			params["x"] = m.Pos.X
 			yi, _ := ln.Evaluate(params)
@@ -342,11 +352,20 @@ func UpdateMarbles() {
 				yr := float32(yi.(float64))
 
 				//slp := (yr - yl) / .02
-				ang := math32.Atan2(yl-yr, 0.02)
-				ang *= 2
+				angLn := math32.Atan2(yr-yl, 0.02)
+				angN := angLn + math.Pi/2 // + 90 deg
 
-				nvx := m.Vel.X*math32.Cos(ang) - m.Vel.Y*math32.Sin(ang)
-				nvy := m.Vel.Y*math32.Sin(ang) + m.Vel.X*math32.Cos(ang)
+				angI := math32.Atan2(m.Vel.Y, m.Vel.X)
+				angII := angI + math.Pi
+
+				angNII := angN - angII
+				angR := math.Pi + 2*angNII
+
+				// fmt.Printf("angLn: %v  angN: %v  angI: %v  angII: %v  angNII: %v  angR: %v\n",
+				// 	RadToDeg(angLn), RadToDeg(angN), RadToDeg(angI), RadToDeg(angII), RadToDeg(angNII), RadToDeg(angR))
+
+				nvx := m.Vel.X*math32.Cos(angR) - m.Vel.Y*math32.Sin(angR)
+				nvy := m.Vel.X*math32.Sin(angR) + m.Vel.Y*math32.Cos(angR)
 
 				m.Vel = gi.Vec2D{nvx, nvy}
 
@@ -380,7 +399,7 @@ func InitMarbles() {
 
 func RunMarbles() {
 
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 200; i++ {
 		//fmt.Printf("Update: %v \n", i)
 		UpdateMarbles()
 		//time.Sleep(time.Duration(unitOfTime) * time.Millisecond)
