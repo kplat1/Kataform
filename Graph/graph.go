@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"time"
 
 	"github.com/Knetic/govaluate"
 	"github.com/goki/gi"
@@ -60,7 +61,25 @@ func main() {
 	gimain.Main(func() {
 		mainrun()
 	})
+
 }
+
+type Marble struct {
+	Pos gi.Vec2D
+	Vel gi.Vec2D
+}
+
+var Marbles []*Marble
+
+var NMarbles = 10
+
+var unitOfTime = 10 // in terms of ms
+
+var StartSpeed = 0.2 // Coordinates per unit of time
+
+var vp *gi.Viewport2D
+
+var Stop = false
 
 func mainrun() {
 	width := 1024
@@ -75,12 +94,22 @@ func mainrun() {
 	rec := ki.Node{}          // receiver for events
 	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
 
+	for n := 0; n < NMarbles; n++ {
+
+		diff := float32(n) / 2
+
+		m := Marble{Pos: gi.Vec2D{0, 10 - diff}, Vel: gi.Vec2D{0, float32(-StartSpeed)}}
+
+		Marbles = append(Marbles, &m)
+
+	}
+
 	oswin.TheApp.SetName("Graphing")
 	oswin.TheApp.SetAbout("Graphing is an app that will allow you to enter equations and have them be graphed. There will also be other modes where you can have marbles fall or things like that.")
 
 	win := gi.NewWindow2D("graph", "Graphing App", width, height, true) // true = pixel sizes
 
-	vp := win.WinViewport2D()
+	vp = win.WinViewport2D()
 	updt := vp.UpdateStart()
 
 	// style sheet
@@ -163,6 +192,23 @@ func mainrun() {
 		}
 	})
 
+	launchMarbles := brow.AddNewChild(gi.KiT_Button, "launchMarbles").(*gi.Button)
+	launchMarbles.Text = "Launch!"
+
+	launchMarbles.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			go RunMarbles()
+		}
+	})
+
+	stopMarbles := brow.AddNewChild(gi.KiT_Button, "stopMarbles").(*gi.Button)
+	stopMarbles.Text = "Stop"
+	stopMarbles.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			Stop = true
+		}
+	})
+
 	frame := mfr.AddNewChild(gi.KiT_Frame, "frame").(*gi.Frame)
 
 	graph = frame.AddNewChild(svg.KiT_SVG, "graph").(*svg.SVG)
@@ -242,6 +288,9 @@ func Graph(exstr string) {
 	lineNo++
 }
 
+var SvgMarbles *svg.Group
+var MarbleRadius = .1
+
 func InitGraph() {
 
 	graph.DeleteChildren(true)
@@ -256,6 +305,46 @@ func InitGraph() {
 	yAxis.End = gi.Vec2D{0, 10}
 	yAxis.SetProp("stroke", "#888")
 
+	SvgMarbles = graph.AddNewChild(svg.KiT_Group, "SvgMarbles").(*svg.Group)
+
+	for _, m := range Marbles {
+
+		circle := SvgMarbles.AddNewChild(svg.KiT_Circle, "circle").(*svg.Circle)
+		circle.SetProp("stroke", "black")
+		circle.SetProp("fill", "purple")
+		circle.Radius = float32(MarbleRadius)
+		circle.Pos = m.Pos
+		circle.Pos.Y = -circle.Pos.Y
+
+	}
+
+}
+func UpdateMarbles() {
+	updt := vp.UpdateStart()
+
+	for i, m := range Marbles {
+
+		m.Pos = m.Pos.Add(m.Vel)
+		circle := SvgMarbles.KnownChild(i).(*svg.Circle)
+		circle.Pos = m.Pos
+		circle.Pos.Y = -circle.Pos.Y
+
+	}
+	vp.UpdateEnd(updt)
+}
+
+func RunMarbles() {
+
+	for i := 0; i < 1000; i++ {
+		//fmt.Printf("Update: %v \n", i)
+		UpdateMarbles()
+		time.Sleep(time.Duration(unitOfTime) * time.Millisecond)
+
+		if Stop {
+			break
+		}
+
+	}
 }
 
 const LIM = 100
