@@ -14,8 +14,17 @@
   },
   "SplitName": "Small",
   "MainLang": "Go",
-  "VersCtrl": "",
-  "ChangeLog": null,
+  "VersCtrl": "Git",
+  "ChangeLog": [
+    {
+      "Date": "2018-10-30T19:43:01.499885191-06:00",
+      "CommitID": "",
+      "Author": "",
+      "Email": "",
+      "Message": "Added basic marbles",
+      "Files": ""
+    }
+  ],
   "ProjFilename": "/home/chrx/go/src/github.com/kplat1/Kataform/Graph/Graph.gide",
   "ProjRoot": "/home/chrx/go/src/github.com/kplat1/Kataform/Graph",
   "BuildCmds": [

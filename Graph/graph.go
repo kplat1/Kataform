@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"log"
 	"math"
-	"time"
 
 	"github.com/Knetic/govaluate"
+	"github.com/chewxy/math32"
 	"github.com/goki/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/oswin"
@@ -93,16 +93,6 @@ func mainrun() {
 
 	rec := ki.Node{}          // receiver for events
 	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
-
-	for n := 0; n < NMarbles; n++ {
-
-		diff := float32(n) / 2
-
-		m := Marble{Pos: gi.Vec2D{0, 10 - diff}, Vel: gi.Vec2D{0, float32(-StartSpeed)}}
-
-		Marbles = append(Marbles, &m)
-
-	}
 
 	oswin.TheApp.SetName("Graphing")
 	oswin.TheApp.SetAbout("Graphing is an app that will allow you to enter equations and have them be graphed. There will also be other modes where you can have marbles fall or things like that.")
@@ -193,7 +183,7 @@ func mainrun() {
 	})
 
 	launchMarbles := brow.AddNewChild(gi.KiT_Button, "launchMarbles").(*gi.Button)
-	launchMarbles.Text = "Launch!"
+	launchMarbles.Text = "Run!"
 
 	launchMarbles.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
@@ -255,6 +245,8 @@ func mainrun() {
 
 }
 
+var Lines []*govaluate.EvaluableExpression
+
 func Graph(exstr string) {
 	path1 := graph.AddNewChild(svg.KiT_Path, "path1").(*svg.Path)
 	path1.SetProp("fill", "none")
@@ -262,6 +254,7 @@ func Graph(exstr string) {
 	path1.SetProp("stroke", clr)
 
 	expr, err := govaluate.NewEvaluableExpressionWithFunctions(exstr, functions)
+	Lines = append(Lines, expr)
 
 	if err != nil {
 		log.Println(err)
@@ -295,6 +288,10 @@ func InitGraph() {
 
 	graph.DeleteChildren(true)
 
+	Stop = false
+
+	Lines = make([]*govaluate.EvaluableExpression, 0)
+
 	xAxis := graph.AddNewChild(svg.KiT_Line, "xAxis").(*svg.Line)
 	xAxis.Start = gi.Vec2D{-10, 0}
 	xAxis.End = gi.Vec2D{10, 0}
@@ -306,6 +303,8 @@ func InitGraph() {
 	yAxis.SetProp("stroke", "#888")
 
 	SvgMarbles = graph.AddNewChild(svg.KiT_Group, "SvgMarbles").(*svg.Group)
+
+	InitMarbles()
 
 	for _, m := range Marbles {
 
@@ -321,10 +320,42 @@ func InitGraph() {
 }
 func UpdateMarbles() {
 	updt := vp.UpdateStart()
-
+	params := make(map[string]interface{}, 8)
+	params["x"] = float64(0)
 	for i, m := range Marbles {
 
 		m.Pos = m.Pos.Add(m.Vel)
+
+		for _, ln := range Lines {
+
+			params["x"] = m.Pos.X
+			yi, _ := ln.Evaluate(params)
+			y := float32(yi.(float64))
+
+			if m.Pos.Y < y {
+				params["x"] = m.Pos.X - .01
+				yi, _ = ln.Evaluate(params)
+				yl := float32(yi.(float64))
+
+				params["x"] = m.Pos.X + .01
+				yi, _ = ln.Evaluate(params)
+				yr := float32(yi.(float64))
+
+				//slp := (yr - yl) / .02
+				ang := math32.Atan2(yl-yr, 0.02)
+				ang *= 2
+
+				nvx := m.Vel.X*math32.Cos(ang) - m.Vel.Y*math32.Sin(ang)
+				nvy := m.Vel.Y*math32.Sin(ang) + m.Vel.X*math32.Cos(ang)
+
+				m.Vel = gi.Vec2D{nvx, nvy}
+
+				m.Pos.Y = y
+				//m.Vel.Y = -m.Vel.Y
+			}
+
+		}
+
 		circle := SvgMarbles.KnownChild(i).(*svg.Circle)
 		circle.Pos = m.Pos
 		circle.Pos.Y = -circle.Pos.Y
@@ -333,12 +364,26 @@ func UpdateMarbles() {
 	vp.UpdateEnd(updt)
 }
 
+func InitMarbles() {
+	Marbles = make([]*Marble, 0)
+	for n := 0; n < NMarbles; n++ {
+
+		diff := float32(n) / 2
+
+		m := Marble{Pos: gi.Vec2D{0, 10 - diff}, Vel: gi.Vec2D{0, float32(-StartSpeed)}}
+
+		Marbles = append(Marbles, &m)
+
+	}
+
+}
+
 func RunMarbles() {
 
 	for i := 0; i < 1000; i++ {
 		//fmt.Printf("Update: %v \n", i)
 		UpdateMarbles()
-		time.Sleep(time.Duration(unitOfTime) * time.Millisecond)
+		//time.Sleep(time.Duration(unitOfTime) * time.Millisecond)
 
 		if Stop {
 			break
