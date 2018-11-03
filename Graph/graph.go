@@ -55,6 +55,7 @@ var functions = map[string]govaluate.ExpressionFunction{
 
 var lineNo = 0
 var colors = []string{"black", "red", "blue", "green", "purple", "brown", "orange"}
+var NumOfEquations = 1
 
 func main() {
 
@@ -63,6 +64,8 @@ func main() {
 	})
 
 }
+
+var irow *gi.Layout
 
 func mainrun() {
 	width := 1024
@@ -114,14 +117,17 @@ func mainrun() {
 	// title.SetProp("letter-spacing", 2)
 	// title.SetStretchMaxWidth()
 
-	graphingInput := mfr.AddNewChild(gi.KiT_TextField, "graphingInput").(*gi.TextField)
+	irow = mfr.AddNewChild(gi.KiT_Layout, "irow").(*gi.Layout)
+	irow.Lay = gi.LayoutVert
+
+	graphingInput := irow.AddNewChild(gi.KiT_TextField, "newEquation0").(*gi.TextField)
 	graphingInput.Placeholder = "Enter your equation"
 	graphingInput.SetProp("min-width", "100ch")
-	graphingInput.TextFieldSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.TextFieldDone) {
-			Graph(graphingInput.Text())
-		}
-	})
+	// graphingInput.TextFieldSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	// 	if sig == int64(gi.TextFieldDone) {
+	// 		Graph(graphingInput.Text())
+	// 	}
+	// })
 
 	brow := mfr.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
 	brow.Lay = gi.LayoutHoriz
@@ -131,11 +137,30 @@ func mainrun() {
 	// brow.SetProp("horizontal-align", gi.AlignJustify)
 	brow.SetStretchMaxWidth()
 
+	addNewEquation := brow.AddNewChild(gi.KiT_Button, "addNewEquation").(*gi.Button)
+	addNewEquation.Text = "Add new equation"
+	addNewEquation.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			updt := vp.UpdateStart()
+
+			newEquation := irow.AddNewChild(gi.KiT_TextField, fmt.Sprintf("newEquation%v", NumOfEquations)).(*gi.TextField)
+			newEquation.Placeholder = "Enter your equation"
+			newEquation.SetProp("min-width", "100ch")
+
+			NumOfEquations++
+
+			vp.UpdateEnd(updt)
+
+		}
+	})
+
 	submitGraphingInput := brow.AddNewChild(gi.KiT_Button, "submitGraphingInput").(*gi.Button)
 	submitGraphingInput.Text = "Graph equation"
 	submitGraphingInput.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			Graph(graphingInput.Text())
+
+			GraphLoop()
+			// Graph(graphingInput.Text())
 		}
 	})
 
@@ -255,11 +280,41 @@ var vp *gi.Viewport2D
 var Stop = false
 
 var Lines []*govaluate.EvaluableExpression
+var SvgLines *svg.Group
+
+var GraphedLine = false
+
+func GraphLoop() {
+
+	updt := graph.UpdateStart()
+	// fmt.Printf("Svg Lines:%vend\n", SvgLines)
+
+	// fmt.Printf("\n Hi :%v:\n", GraphedLine)
+
+	if GraphedLine {
+
+		fmt.Printf("Deleting children \n")
+
+		SvgLines.DeleteChildren(true)
+
+		Lines = nil
+
+	}
+	SvgLines = graph.AddNewChild(svg.KiT_Group, "SvgLines").(*svg.Group)
+
+	for i := 0; i < NumOfEquations; i++ {
+		equation := irow.KnownChild(i).(*gi.TextField)
+		text := equation.Text()
+		Graph(text)
+		GraphedLine = true
+	}
+	graph.UpdateEnd(updt)
+}
 
 func Graph(exstr string) {
 	updt := graph.UpdateStart()
 
-	path1 := graph.AddNewChild(svg.KiT_Path, "path1").(*svg.Path)
+	path1 := SvgLines.AddNewChild(svg.KiT_Path, "path1").(*svg.Path)
 	path1.SetProp("fill", "none")
 	clr := colors[lineNo%len(colors)]
 	path1.SetProp("stroke", clr)
@@ -294,6 +349,7 @@ func Graph(exstr string) {
 }
 
 var SvgMarbles *svg.Group
+
 var MarbleRadius = .1
 
 func InitGraph() {
