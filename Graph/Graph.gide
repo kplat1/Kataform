@@ -6,6 +6,7 @@
     "HiStyle": "emacs",
     "FontFamily": "Go Mono",
     "TabSize": 4,
+    "SpaceIndent": false,
     "WordWrap": true,
     "LineNos": true,
     "Completion": true,
@@ -16,6 +17,14 @@
   "MainLang": "Go",
   "VersCtrl": "Git",
   "ChangeLog": [
+    {
+      "Date": "2018-10-31T17:06:49.89836445-06:00",
+      "CommitID": "",
+      "Author": "",
+      "Email": "",
+      "Message": "Added angles working",
+      "Files": ""
+    },
     {
       "Date": "2018-10-30T20:48:29.238685719-06:00",
       "CommitID": "",

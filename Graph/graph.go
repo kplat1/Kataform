@@ -75,7 +75,7 @@ var NMarbles = 10
 
 var unitOfTime = 10 // in terms of ms
 
-var StartSpeed = 0.2 // Coordinates per unit of time
+var StartSpeed = 0 // Coordinates per unit of time
 
 var vp *gi.Viewport2D
 
@@ -134,18 +134,18 @@ func mainrun() {
 	graphingInput := mfr.AddNewChild(gi.KiT_TextField, "graphingInput").(*gi.TextField)
 	graphingInput.Placeholder = "Enter your equation"
 	graphingInput.SetProp("min-width", "100ch")
-	graphingInput.TextFieldSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.TextFieldDone) {
-			updt := vp.UpdateStart()
-
-			//graphResult := mfr.AddNewChild(gi.KiT_Label, "graphResult").(*gi.Label)
-			//graphResult.Text = fmt.Sprintf("Your equation is: %v", graphingInput.Text())
-
-			Graph(graphingInput.Text())
-
-			vp.UpdateEnd(updt)
-		}
-	})
+	// graphingInput.TextFieldSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	// 	if sig == int64(gi.TextFieldDone) {
+	// 		updt := vp.UpdateStart()
+	//
+	// 		//graphResult := mfr.AddNewChild(gi.KiT_Label, "graphResult").(*gi.Label)
+	// 		//graphResult.Text = fmt.Sprintf("Your equation is: %v", graphingInput.Text())
+	//
+	// 		Graph(graphingInput.Text())
+	//
+	// 		vp.UpdateEnd(updt)
+	// 	}
+	// })
 
 	brow := mfr.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
 	brow.Lay = gi.LayoutHoriz
@@ -325,13 +325,17 @@ func RadToDeg(rad float32) float32 {
 	return rad * 180 / math.Pi
 }
 
+var Friction = float32(0.75)
+var Gravity = float32(0.01)
+
 func UpdateMarbles() {
 	updt := vp.UpdateStart()
 	params := make(map[string]interface{}, 8)
 	params["x"] = float64(0)
 	for i, m := range Marbles {
 
-		m.Pos = m.Pos.Add(m.Vel)
+		m.Vel.Y -= Gravity
+		npos := m.Pos.Add(m.Vel)
 
 		for _, ln := range Lines {
 			if ln == nil {
@@ -342,7 +346,10 @@ func UpdateMarbles() {
 			yi, _ := ln.Evaluate(params)
 			y := float32(yi.(float64))
 
-			if m.Pos.Y < y {
+			if (npos.Y < y && m.Pos.Y >= y) || (npos.Y > y && m.Pos.Y <= y) {
+				//				(npos.X < x && m.Pos.X >= x) || (npos.X > x && m.Pos.X <= x) {
+				// fmt.Printf("y: %v npos: %v pos: %v\n", y, npos.Y, m.Pos.Y)
+
 				params["x"] = m.Pos.X - .01
 				yi, _ = ln.Evaluate(params)
 				yl := float32(yi.(float64))
@@ -364,17 +371,19 @@ func UpdateMarbles() {
 				// fmt.Printf("angLn: %v  angN: %v  angI: %v  angII: %v  angNII: %v  angR: %v\n",
 				// 	RadToDeg(angLn), RadToDeg(angN), RadToDeg(angI), RadToDeg(angII), RadToDeg(angNII), RadToDeg(angR))
 
-				nvx := m.Vel.X*math32.Cos(angR) - m.Vel.Y*math32.Sin(angR)
-				nvy := m.Vel.X*math32.Sin(angR) + m.Vel.Y*math32.Cos(angR)
+				nvx := Friction * (m.Vel.X*math32.Cos(angR) - m.Vel.Y*math32.Sin(angR))
+				nvy := Friction * (m.Vel.X*math32.Sin(angR) + m.Vel.Y*math32.Cos(angR))
 
 				m.Vel = gi.Vec2D{nvx, nvy}
 
-				m.Pos.Y = y
+				//m.Pos.Y = y
 				//m.Vel.Y = -m.Vel.Y
+				break
 			}
 
 		}
 
+		m.Pos = m.Pos.Add(m.Vel)
 		circle := SvgMarbles.KnownChild(i).(*svg.Circle)
 		circle.Pos = m.Pos
 		circle.Pos.Y = -circle.Pos.Y
@@ -399,7 +408,7 @@ func InitMarbles() {
 
 func RunMarbles() {
 
-	for i := 0; i < 200; i++ {
+	for i := 0; i < 300; i++ {
 		//fmt.Printf("Update: %v \n", i)
 		UpdateMarbles()
 		//time.Sleep(time.Duration(unitOfTime) * time.Millisecond)
