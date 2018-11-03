@@ -64,23 +64,6 @@ func main() {
 
 }
 
-type Marble struct {
-	Pos gi.Vec2D
-	Vel gi.Vec2D
-}
-
-var Marbles []*Marble
-
-var NMarbles = 10
-
-var unitOfTime = 10 // in terms of ms
-
-var StartSpeed = 0 // Coordinates per unit of time
-
-var vp *gi.Viewport2D
-
-var Stop = false
-
 func mainrun() {
 	width := 1024
 	height := 768
@@ -191,6 +174,15 @@ func mainrun() {
 		}
 	})
 
+	stepMarbles := brow.AddNewChild(gi.KiT_Button, "stepMarbles").(*gi.Button)
+	stepMarbles.Text = "Step"
+
+	stepMarbles.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			go UpdateMarbles()
+		}
+	})
+
 	stopMarbles := brow.AddNewChild(gi.KiT_Button, "stopMarbles").(*gi.Button)
 	stopMarbles.Text = "Stop"
 	stopMarbles.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -198,6 +190,16 @@ func mainrun() {
 
 			Stop = true
 			fmt.Printf("Stop is: %v \n", Stop)
+		}
+	})
+
+	resetMarbles := brow.AddNewChild(gi.KiT_Button, "resetMarbles").(*gi.Button)
+	resetMarbles.Text = "Reset Marbles"
+	resetMarbles.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+
+			ResetMarbles()
+
 		}
 	})
 
@@ -247,6 +249,30 @@ func mainrun() {
 
 }
 
+type Marble struct {
+	Pos    gi.Vec2D
+	Vel    gi.Vec2D
+	PrvPos gi.Vec2D
+}
+
+func (mb *Marble) Init(diff float32) {
+	mb.Pos = gi.Vec2D{0, 10 - diff}
+	mb.Vel = gi.Vec2D{0, float32(-StartSpeed)}
+	mb.PrvPos = mb.Pos
+}
+
+var Marbles []*Marble
+
+var NMarbles = 10
+
+var unitOfTime = 10 // in terms of ms
+
+var StartSpeed = 0 // Coordinates per unit of time
+
+var vp *gi.Viewport2D
+
+var Stop = false
+
 var Lines []*govaluate.EvaluableExpression
 
 func Graph(exstr string) {
@@ -288,6 +314,7 @@ var MarbleRadius = .1
 
 func InitGraph() {
 
+	lineNo = 0
 	graph.DeleteChildren(true)
 
 	Stop = false
@@ -336,6 +363,7 @@ func UpdateMarbles() {
 
 		m.Vel.Y -= Gravity
 		npos := m.Pos.Add(m.Vel)
+		ppos := m.PrvPos
 
 		for _, ln := range Lines {
 			if ln == nil {
@@ -346,9 +374,14 @@ func UpdateMarbles() {
 			yi, _ := ln.Evaluate(params)
 			y := float32(yi.(float64))
 
-			if (npos.Y < y && m.Pos.Y >= y) || (npos.Y > y && m.Pos.Y <= y) {
-				//				(npos.X < x && m.Pos.X >= x) || (npos.X > x && m.Pos.X <= x) {
-				// fmt.Printf("y: %v npos: %v pos: %v\n", y, npos.Y, m.Pos.Y)
+			params["x"] = m.PrvPos.X
+			yi, _ = ln.Evaluate(params)
+			yp := float32(yi.(float64))
+
+			// fmt.Printf("y: %v npos: %v pos: %v\n", y, npos.Y, m.Pos.Y)
+
+			if (npos.Y < y && m.PrvPos.Y >= yp) || (npos.Y > y && m.PrvPos.Y <= yp) {
+				//				fmt.Printf("crossed!!\n")
 
 				params["x"] = m.Pos.X - .01
 				yi, _ = ln.Evaluate(params)
@@ -376,18 +409,33 @@ func UpdateMarbles() {
 
 				m.Vel = gi.Vec2D{nvx, nvy}
 
-				//m.Pos.Y = y
+				m.Pos.Y = y
 				//m.Vel.Y = -m.Vel.Y
 				break
 			}
-
 		}
 
+		m.PrvPos = ppos
 		m.Pos = m.Pos.Add(m.Vel)
+
 		circle := SvgMarbles.KnownChild(i).(*svg.Circle)
 		circle.Pos = m.Pos
 		circle.Pos.Y = -circle.Pos.Y
 
+	}
+	vp.UpdateEnd(updt)
+}
+
+func ResetMarbles() {
+	updt := vp.UpdateStart()
+	fmt.Printf("Reset marbles \n")
+
+	for i, m := range Marbles {
+		diff := float32(i) / 2
+		m.Init(diff)
+		circle := SvgMarbles.KnownChild(i).(*svg.Circle)
+		circle.Pos = m.Pos
+		circle.Pos.Y = -circle.Pos.Y
 	}
 	vp.UpdateEnd(updt)
 }
@@ -398,12 +446,11 @@ func InitMarbles() {
 
 		diff := float32(n) / 2
 
-		m := Marble{Pos: gi.Vec2D{0, 10 - diff}, Vel: gi.Vec2D{0, float32(-StartSpeed)}}
+		m := Marble{}
+		m.Init(diff)
 
 		Marbles = append(Marbles, &m)
-
 	}
-
 }
 
 func RunMarbles() {
