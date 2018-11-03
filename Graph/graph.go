@@ -117,18 +117,11 @@ func mainrun() {
 	graphingInput := mfr.AddNewChild(gi.KiT_TextField, "graphingInput").(*gi.TextField)
 	graphingInput.Placeholder = "Enter your equation"
 	graphingInput.SetProp("min-width", "100ch")
-	// graphingInput.TextFieldSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-	// 	if sig == int64(gi.TextFieldDone) {
-	// 		updt := vp.UpdateStart()
-	//
-	// 		//graphResult := mfr.AddNewChild(gi.KiT_Label, "graphResult").(*gi.Label)
-	// 		//graphResult.Text = fmt.Sprintf("Your equation is: %v", graphingInput.Text())
-	//
-	// 		Graph(graphingInput.Text())
-	//
-	// 		vp.UpdateEnd(updt)
-	// 	}
-	// })
+	graphingInput.TextFieldSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.TextFieldDone) {
+			Graph(graphingInput.Text())
+		}
+	})
 
 	brow := mfr.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
 	brow.Lay = gi.LayoutHoriz
@@ -142,14 +135,7 @@ func mainrun() {
 	submitGraphingInput.Text = "Graph equation"
 	submitGraphingInput.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			updt := vp.UpdateStart()
-
-			//graphResult := mfr.AddNewChild(gi.KiT_Label, "graphResult").(*gi.Label)
-			//graphResult.Text = fmt.Sprintf("Your equation is: %v", graphingInput.Text())
-
 			Graph(graphingInput.Text())
-
-			vp.UpdateEnd(updt)
 		}
 	})
 
@@ -157,18 +143,13 @@ func mainrun() {
 	resetGraphButton.Text = "Reset graph"
 	resetGraphButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			updt := vp.UpdateStart()
-
 			InitGraph()
-
-			vp.UpdateEnd(updt)
 		}
 	})
 
-	launchMarbles := brow.AddNewChild(gi.KiT_Button, "launchMarbles").(*gi.Button)
-	launchMarbles.Text = "Run!"
-
-	launchMarbles.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	runMarbles := brow.AddNewChild(gi.KiT_Button, "runMarbles").(*gi.Button)
+	runMarbles.Text = "Run!"
+	runMarbles.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
 			go RunMarbles()
 		}
@@ -176,7 +157,6 @@ func mainrun() {
 
 	stepMarbles := brow.AddNewChild(gi.KiT_Button, "stepMarbles").(*gi.Button)
 	stepMarbles.Text = "Step"
-
 	stepMarbles.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
 			go UpdateMarbles()
@@ -187,9 +167,8 @@ func mainrun() {
 	stopMarbles.Text = "Stop"
 	stopMarbles.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-
 			Stop = true
-			fmt.Printf("Stop is: %v \n", Stop)
+			// fmt.Printf("Stop is: %v \n", Stop)
 		}
 	})
 
@@ -197,9 +176,7 @@ func mainrun() {
 	resetMarbles.Text = "Reset Marbles"
 	resetMarbles.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-
 			ResetMarbles()
-
 		}
 	})
 
@@ -246,7 +223,6 @@ func mainrun() {
 	vp.UpdateEndNoSig(updt)
 
 	win.StartEventLoop()
-
 }
 
 type Marble struct {
@@ -263,11 +239,16 @@ func (mb *Marble) Init(diff float32) {
 
 var Marbles []*Marble
 
+// Kai: put all these in a struct, and add a StructInlineView to edit them.
+// see your other code for how to do it..
+
 var NMarbles = 10
 
-var unitOfTime = 10 // in terms of ms
+var NSteps = 1000 // number of steps to take when running -- Stop works now..
 
-var StartSpeed = 0 // Coordinates per unit of time
+var StartSpeed = float32(0) // Coordinates per unit of time
+
+var UpdtRate = float32(.2) // how fast to move along velocity vector -- lower = smoother, more slow-mo
 
 var vp *gi.Viewport2D
 
@@ -276,6 +257,8 @@ var Stop = false
 var Lines []*govaluate.EvaluableExpression
 
 func Graph(exstr string) {
+	updt := graph.UpdateStart()
+
 	path1 := graph.AddNewChild(svg.KiT_Path, "path1").(*svg.Path)
 	path1.SetProp("fill", "none")
 	clr := colors[lineNo%len(colors)]
@@ -307,12 +290,14 @@ func Graph(exstr string) {
 	}
 	path1.SetData(ps)
 	lineNo++
+	graph.UpdateEnd(updt)
 }
 
 var SvgMarbles *svg.Group
 var MarbleRadius = .1
 
 func InitGraph() {
+	updt := graph.UpdateStart()
 
 	lineNo = 0
 	graph.DeleteChildren(true)
@@ -345,7 +330,7 @@ func InitGraph() {
 		circle.Pos.Y = -circle.Pos.Y
 
 	}
-
+	graph.UpdateEnd(updt)
 }
 
 func RadToDeg(rad float32) float32 {
@@ -356,13 +341,13 @@ var Friction = float32(0.75)
 var Gravity = float32(0.01)
 
 func UpdateMarbles() {
-	updt := vp.UpdateStart()
+	updt := graph.UpdateStart()
 	params := make(map[string]interface{}, 8)
 	params["x"] = float64(0)
 	for i, m := range Marbles {
 
 		m.Vel.Y -= Gravity
-		npos := m.Pos.Add(m.Vel)
+		npos := m.Pos.Add(m.Vel.MulVal(UpdtRate))
 		ppos := m.PrvPos
 
 		for _, ln := range Lines {
@@ -416,19 +401,18 @@ func UpdateMarbles() {
 		}
 
 		m.PrvPos = ppos
-		m.Pos = m.Pos.Add(m.Vel)
+		m.Pos = m.Pos.Add(m.Vel.MulVal(UpdtRate))
 
 		circle := SvgMarbles.KnownChild(i).(*svg.Circle)
 		circle.Pos = m.Pos
 		circle.Pos.Y = -circle.Pos.Y
 
 	}
-	vp.UpdateEnd(updt)
+	graph.UpdateEnd(updt)
 }
 
 func ResetMarbles() {
-	updt := vp.UpdateStart()
-	fmt.Printf("Reset marbles \n")
+	updt := graph.UpdateStart()
 
 	for i, m := range Marbles {
 		diff := float32(i) / 2
@@ -437,7 +421,7 @@ func ResetMarbles() {
 		circle.Pos = m.Pos
 		circle.Pos.Y = -circle.Pos.Y
 	}
-	vp.UpdateEnd(updt)
+	graph.UpdateEnd(updt)
 }
 
 func InitMarbles() {
@@ -454,16 +438,13 @@ func InitMarbles() {
 }
 
 func RunMarbles() {
-
-	for i := 0; i < 300; i++ {
+	Stop = false
+	for i := 0; i < NSteps; i++ {
 		//fmt.Printf("Update: %v \n", i)
 		UpdateMarbles()
-		//time.Sleep(time.Duration(unitOfTime) * time.Millisecond)
-
 		if Stop {
 			break
 		}
-
 	}
 }
 
