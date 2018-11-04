@@ -1,17 +1,26 @@
-[
-  {
-    "Eq": "5 * sin(x)",
-    "Color": "black",
-    "Bounce": 0.95
+{
+  "Params": {
+    "NMarbles": 10,
+    "NSteps": 1000,
+    "StartSpeed": 0,
+    "UpdtRate": 0.02,
+    "Gravity": 0.1
   },
-  {
-    "Eq": "10 * (x-9)",
-    "Color": "red",
-    "Bounce": 0.95
-  },
-  {
-    "Eq": "-10 * (x + 9)",
-    "Color": "blue",
-    "Bounce": 0.95
-  }
-]
+  "Lines": [
+    {
+      "Eq": "1 * sin(x)",
+      "Color": "black",
+      "Bounce": 0.95
+    },
+    {
+      "Eq": "10 * (x - 9)",
+      "Color": "red",
+      "Bounce": 0.95
+    },
+    {
+      "Eq": "-10 * (x + 9)",
+      "Color": "blue",
+      "Bounce": 0.95
+    }
+  ]
+}

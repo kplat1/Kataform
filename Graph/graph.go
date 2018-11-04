@@ -15,34 +15,128 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-var functions = map[string]govaluate.ExpressionFunction{
-	"cos": func(args ...interface{}) (interface{}, error) {
-		y := math.Cos(args[0].(float64))
-		return y, nil
-	},
-	"sin": func(args ...interface{}) (interface{}, error) {
-		y := math.Sin(args[0].(float64))
-		return y, nil
-	},
-	"tan": func(args ...interface{}) (interface{}, error) {
-		y := math.Tan(args[0].(float64))
-		return y, nil
-	},
-	"pow": func(args ...interface{}) (interface{}, error) {
-		y := math.Pow(args[0].(float64), args[1].(float64))
-		return y, nil
-	},
-	"abs": func(args ...interface{}) (interface{}, error) {
-		y := math.Abs(args[0].(float64))
-		return y, nil
-	},
-	"fact": func(args ...interface{}) (interface{}, error) {
-		y := FactorialMemoization(int(args[0].(float64)))
-		return y, nil
+var colors = []string{"black", "red", "blue", "green", "purple", "brown", "orange"}
+
+// Graph represents the overall graph parameters -- lines and params
+type Graph struct {
+	Params Params `desc:"the parameters for updating the marbles"`
+	Lines  Lines  `view:"-" desc:"the lines of the graph -- can have any number"`
+}
+
+// Gr is current graph
+var Gr Graph
+
+var KiT_Graph = kit.Types.AddType(&Graph{}, GraphProps)
+
+// GraphProps define the ToolBar for overall app
+var GraphProps = ki.Props{
+	"ToolBar": ki.PropSlice{
+		{"OpenJSON", ki.Props{
+			"label": "Open...",
+			"desc":  "Opens line equations and params from a .json file.",
+			"icon":  "file-open",
+			"Args": ki.PropSlice{
+				{"File Name", ki.Props{
+					"ext": ".json",
+				}},
+			},
+		}},
+		{"SaveJSON", ki.Props{
+			"label": "Save As...",
+			"desc":  "Saves line equations and params to a .json file.",
+			"icon":  "file-save",
+			"Args": ki.PropSlice{
+				{"File Name", ki.Props{
+					"ext": ".json",
+				}},
+			},
+		}},
+		{"sep-ctrl", ki.BlankProp{}},
+		{"Graph", ki.Props{
+			"desc": "updates graph for current equations, and resets marbles too",
+			"icon": "update",
+		}},
+		{"Run", ki.Props{
+			"desc":            "runs the marbles for NSteps",
+			"icon":            "run",
+			"no-update-after": true,
+		}},
+		{"Stop", ki.Props{
+			"desc":            "runs the marbles for NSteps",
+			"icon":            "stop",
+			"no-update-after": true,
+		}},
+		{"Step", ki.Props{
+			"desc":            "steps the marbles for one step",
+			"icon":            "step-fwd",
+			"no-update-after": true,
+		}},
+		{"Reset", ki.Props{
+			"desc":            "resets marbles to their initial starting positions",
+			"icon":            "update",
+			"no-update-after": true,
+		}},
 	},
 }
 
-var colors = []string{"black", "red", "blue", "green", "purple", "brown", "orange"}
+func (gr *Graph) Defaults() {
+	gr.Params.Defaults()
+	gr.Lines.Defaults()
+}
+
+// OpenJSON open from JSON file
+func (gr *Graph) OpenJSON(filename gi.FileName) error {
+	b, err := ioutil.ReadFile(string(filename))
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(b, gr)
+	gr.Graph()
+	return err
+}
+
+// SaveJSON save to JSON file
+func (gr *Graph) SaveJSON(filename gi.FileName) error {
+	b, err := json.MarshalIndent(gr, "", "  ")
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	err = ioutil.WriteFile(string(filename), b, 0644)
+	if err != nil {
+		log.Println(err)
+	}
+	return err
+}
+
+// Graph updates graph for current equations, and resets marbles too
+func (gr *Graph) Graph() {
+	ResetMarbles()
+	gr.Lines.Graph()
+}
+
+// Run runs the marbles for NSteps
+func (gr *Graph) Run() {
+	go RunMarbles()
+}
+
+// Stop stops the marbles
+func (gr *Graph) Stop() {
+	Stop = true
+}
+
+// Step does one step update of marbles
+func (gr *Graph) Step() {
+	UpdateMarbles()
+}
+
+// Reset resets the marbles to their initial starting positions
+func (gr *Graph) Reset() {
+	ResetMarbles()
+}
+
+///////////////////////////////////////////////////////////////////////////
+//  Lines
 
 // Line represents one line with an equation etc
 type Line struct {
@@ -78,36 +172,31 @@ type Lines []*Line
 
 var KiT_Lines = kit.Types.AddType(&Lines{}, LinesProps)
 
-// todo: make an overall object that has Lines and Params and that is what we save
-
 // LinesProps define the ToolBar for lines
 var LinesProps = ki.Props{
-	"ToolBar": ki.PropSlice{
-		{"OpenJSON", ki.Props{
-			"label": "Open...",
-			"desc":  "opens equations from a .json file.",
-			"icon":  "file-open",
-			"Args": ki.PropSlice{
-				{"File Name", ki.Props{
-					"ext": ".json",
-				}},
-			},
-		}},
-		{"SaveJSON", ki.Props{
-			"label": "Save As...",
-			"desc":  "Saves equations from a .json file.",
-			"icon":  "file-save",
-			"Args": ki.PropSlice{
-				{"File Name", ki.Props{
-					"ext": ".json",
-				}},
-			},
-		}},
-	},
+	// "ToolBar": ki.PropSlice{
+	// 	{"OpenJSON", ki.Props{
+	// 		"label": "Open...",
+	// 		"desc":  "opens equations from a .json file.",
+	// 		"icon":  "file-open",
+	// 		"Args": ki.PropSlice{
+	// 			{"File Name", ki.Props{
+	// 				"ext": ".json",
+	// 			}},
+	// 		},
+	// 	}},
+	// 	{"SaveJSON", ki.Props{
+	// 		"label": "Save As...",
+	// 		"desc":  "Saves equations from a .json file.",
+	// 		"icon":  "file-save",
+	// 		"Args": ki.PropSlice{
+	// 			{"File Name", ki.Props{
+	// 				"ext": ".json",
+	// 			}},
+	// 		},
+	// 	}},
+	// },
 }
-
-// Lns are our lines
-var Lns Lines
 
 func (ls *Lines) Defaults() {
 	*ls = make(Lines, 1, 10)
@@ -141,12 +230,12 @@ func (ls *Lines) SaveJSON(filename gi.FileName) error {
 }
 
 func (ls *Lines) Graph() {
-	updt := Graph.UpdateStart()
+	updt := SvgGraph.UpdateStart()
 	SvgLines.DeleteChildren(true)
 	for i, ln := range *ls {
 		ln.Graph(i)
 	}
-	Graph.UpdateEnd(updt)
+	SvgGraph.UpdateEnd(updt)
 }
 
 // Graph graphs this line in the SvgLines group
@@ -156,6 +245,9 @@ func (ln *Line) Graph(lidx int) {
 	}
 	if ln.Color == "" {
 		ln.Color = colors[lidx%len(colors)]
+	}
+	if ln.Bounce == 0 {
+		ln.Bounce = 0.95
 	}
 	path := SvgLines.AddNewChild(svg.KiT_Path, "path").(*svg.Path)
 	path.SetProp("fill", "none")
@@ -173,7 +265,7 @@ func (ln *Line) Graph(lidx int) {
 	ps := ""
 	start := true
 	for x := gmin.X; x < gmax.X; x += ginc.X {
-		y := -ln.Eval(x)
+		y := ln.Eval(x)
 		if start {
 			ps += fmt.Sprintf("M %v %v ", x, y)
 			start = false
@@ -185,7 +277,7 @@ func (ln *Line) Graph(lidx int) {
 }
 
 func InitCoords() {
-	updt := Graph.UpdateStart()
+	updt := SvgGraph.UpdateStart()
 	SvgCoords.DeleteChildren(true)
 
 	xAxis := SvgCoords.AddNewChild(svg.KiT_Line, "xAxis").(*svg.Line)
@@ -198,7 +290,7 @@ func InitCoords() {
 	yAxis.End = gi.Vec2D{0, 10}
 	yAxis.SetProp("stroke", "#888")
 
-	Graph.UpdateEnd(updt)
+	SvgGraph.UpdateEnd(updt)
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -213,7 +305,7 @@ type Marble struct {
 
 func (mb *Marble) Init(diff float32) {
 	mb.Pos = gi.Vec2D{0, 10 - diff}
-	mb.Vel = gi.Vec2D{0, float32(-Pars.StartSpeed)}
+	mb.Vel = gi.Vec2D{0, float32(-Gr.Params.StartSpeed)}
 	mb.PrvPos = mb.Pos
 }
 
@@ -231,14 +323,11 @@ type Params struct {
 	Gravity    float32 `min:"0" max:"2" step:".01" desc:"how fast it accellerates down"`
 }
 
-// Pars is the one instance of the Params type
-var Pars Params
-
 func (pr *Params) Defaults() {
 	pr.NMarbles = 10
 	pr.NSteps = 1000
 	pr.StartSpeed = 0
-	pr.UpdtRate = .01
+	pr.UpdtRate = .02
 	pr.Gravity = 0.1
 }
 
@@ -250,7 +339,7 @@ func RadToDeg(rad float32) float32 {
 
 // GraphMarblesInit initializes the graph drawing of the marbles
 func GraphMarblesInit() {
-	updt := Graph.UpdateStart()
+	updt := SvgGraph.UpdateStart()
 
 	SvgMarbles.DeleteChildren(true)
 	for i, m := range Marbles {
@@ -259,16 +348,15 @@ func GraphMarblesInit() {
 		circle.SetProp("fill", colors[i%len(colors)])
 		circle.Radius = float32(MarbleRadius)
 		circle.Pos = m.Pos
-		circle.Pos.Y = -circle.Pos.Y
 	}
-	Graph.UpdateEnd(updt)
+	SvgGraph.UpdateEnd(updt)
 }
 
 // InitMarbles creates the marbles and puts them at their initial positions
 func InitMarbles() {
 	Marbles = make([]*Marble, 0)
-	for n := 0; n < Pars.NMarbles; n++ {
-		diff := 2 * float32(n) / float32(Pars.NMarbles)
+	for n := 0; n < Gr.Params.NMarbles; n++ {
+		diff := 2 * float32(n) / float32(Gr.Params.NMarbles)
 		m := Marble{}
 		m.Init(diff)
 		Marbles = append(Marbles, &m)
@@ -282,13 +370,13 @@ func ResetMarbles() {
 }
 
 func UpdateMarbles() {
-	updt := Graph.UpdateStart()
+	updt := SvgGraph.UpdateStart()
 	for i, m := range Marbles {
-		m.Vel.Y -= Pars.Gravity
-		npos := m.Pos.Add(m.Vel.MulVal(Pars.UpdtRate))
+		m.Vel.Y -= Gr.Params.Gravity
+		npos := m.Pos.Add(m.Vel.MulVal(Gr.Params.UpdtRate))
 		ppos := m.PrvPos
 
-		for _, ln := range Lns {
+		for _, ln := range Gr.Lines {
 			if ln.expr == nil {
 				continue
 			}
@@ -320,31 +408,57 @@ func UpdateMarbles() {
 
 				m.Vel = gi.Vec2D{nvx, nvy}
 
-				m.Pos.Y = y
+				// m.Pos.Y = y
 				break
 			}
 		}
 
 		m.PrvPos = ppos
-		m.Pos = m.Pos.Add(m.Vel.MulVal(Pars.UpdtRate))
+		m.Pos = m.Pos.Add(m.Vel.MulVal(Gr.Params.UpdtRate))
 
 		circle := SvgMarbles.KnownChild(i).(*svg.Circle)
 		circle.Pos = m.Pos
-		circle.Pos.Y = -circle.Pos.Y
 	}
-	Graph.UpdateEnd(updt)
+	SvgGraph.UpdateEnd(updt)
 }
 
 var Stop = false
 
 func RunMarbles() {
 	Stop = false
-	for i := 0; i < Pars.NSteps; i++ {
+	for i := 0; i < Gr.Params.NSteps; i++ {
 		UpdateMarbles()
 		if Stop {
 			break
 		}
 	}
+}
+
+var functions = map[string]govaluate.ExpressionFunction{
+	"cos": func(args ...interface{}) (interface{}, error) {
+		y := math.Cos(args[0].(float64))
+		return y, nil
+	},
+	"sin": func(args ...interface{}) (interface{}, error) {
+		y := math.Sin(args[0].(float64))
+		return y, nil
+	},
+	"tan": func(args ...interface{}) (interface{}, error) {
+		y := math.Tan(args[0].(float64))
+		return y, nil
+	},
+	"pow": func(args ...interface{}) (interface{}, error) {
+		y := math.Pow(args[0].(float64), args[1].(float64))
+		return y, nil
+	},
+	"abs": func(args ...interface{}) (interface{}, error) {
+		y := math.Abs(args[0].(float64))
+		return y, nil
+	},
+	"fact": func(args ...interface{}) (interface{}, error) {
+		y := FactorialMemoization(int(args[0].(float64)))
+		return y, nil
+	},
 }
 
 const LIM = 100
