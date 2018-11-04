@@ -63,7 +63,7 @@ func mainrun() {
 	// the StructView will also show the Graph Toolbar which is main actions..
 	gstru := mfr.AddNewChild(giv.KiT_StructView, "gstru").(*giv.StructView)
 	gstru.Viewport = Vp // needs vp early for toolbar
-	gstru.SetProp("height", "4em")
+	gstru.SetProp("height", "4.5em")
 	gstru.SetStruct(&Gr, nil)
 
 	lns := mfr.AddNewChild(giv.KiT_TableView, "lns").(*giv.TableView)
