@@ -141,6 +141,8 @@ func (gr *Graph) Reset() {
 // Line represents one line with an equation etc
 type Line struct {
 	Eq     string                         `width:"60" desc:"equation: use 'x' for the x value, and must use * for multiplication, and start with 0 for decimal numbers (0.01 instead of .01)"`
+	MinX   float32                        `step:"1" desc:"Mininum x value for this line."`
+	MaxX   float32                        `step:"1" desc:"Maximum x value for this line."`
 	Color  string                         `desc:"color to draw the line in"`
 	Bounce float32                        `min:"0" max:"2" step:".05" desc:"how bouncy the line is -- 1 = perfectly bouncy, 0 = no bounce at all"`
 	expr   *govaluate.EvaluableExpression `tableview:"-" desc:"the expression evaluator"`
@@ -151,6 +153,8 @@ func (ln *Line) Defaults(lidx int) {
 	ln.Eq = "x"
 	ln.Color = colors[lidx%len(colors)]
 	ln.Bounce = 0.95
+	ln.MinX = -10
+	ln.MaxX = 10
 }
 
 // Eval gives the y value of the function for given x value
@@ -203,6 +207,7 @@ func (ls *Lines) Defaults() {
 	ln := Line{}
 	(*ls)[0] = &ln
 	ln.Defaults(0)
+
 }
 
 // OpenJSON open from JSON file
@@ -249,6 +254,12 @@ func (ln *Line) Graph(lidx int) {
 	if ln.Bounce == 0 {
 		ln.Bounce = 0.95
 	}
+	if ln.MinX == 0 {
+		ln.MinX = -10
+	}
+	if ln.MaxX == 0 {
+		ln.MaxX = 10
+	}
 	path := SvgLines.AddNewChild(svg.KiT_Path, "path").(*svg.Path)
 	path.SetProp("fill", "none")
 	clr := ln.Color
@@ -265,12 +276,15 @@ func (ln *Line) Graph(lidx int) {
 	ps := ""
 	start := true
 	for x := gmin.X; x < gmax.X; x += ginc.X {
-		y := ln.Eval(x)
-		if start {
-			ps += fmt.Sprintf("M %v %v ", x, y)
-			start = false
-		} else {
-			ps += fmt.Sprintf("L %v %v ", x, y)
+
+		if x > ln.MinX && x < ln.MaxX {
+			y := ln.Eval(x)
+			if start {
+				ps += fmt.Sprintf("M %v %v ", x, y)
+				start = false
+			} else {
+				ps += fmt.Sprintf("L %v %v ", x, y)
+			}
 		}
 	}
 	path.SetData(ps)
@@ -371,24 +385,49 @@ func ResetMarbles() {
 
 func UpdateMarbles() {
 	updt := SvgGraph.UpdateStart()
+
 	for i, m := range Marbles {
+
 		m.Vel.Y -= Gr.Params.Gravity
 		npos := m.Pos.Add(m.Vel.MulVal(Gr.Params.UpdtRate))
-		ppos := m.PrvPos
+		ppos := m.Pos
 
 		for _, ln := range Gr.Lines {
 			if ln.expr == nil {
 				continue
 			}
 
-			y := ln.Eval(m.Pos.X)
-			yp := ln.Eval(m.PrvPos.X)
+			yp := ln.Eval(m.Pos.X)
+			yn := ln.Eval(npos.X)
 
 			// fmt.Printf("y: %v npos: %v pos: %v\n", y, npos.Y, m.Pos.Y)
 
-			if (npos.Y < y && m.PrvPos.Y >= yp) || (npos.Y > y && m.PrvPos.Y <= yp) {
-				yl := ln.Eval(m.Pos.X - .01) // point to the left of x
-				yr := ln.Eval(m.Pos.X + .01) // point to the right of x
+			if ((npos.Y < yn && m.Pos.Y >= yp) || (npos.Y > yn && m.Pos.Y <= yp)) && (npos.X < ln.MaxX && npos.X > ln.MinX) {
+				// fmt.Printf("Collided! Equation is: %v \n", ln.Eq)
+
+				dly := yn - yp // change in the lines y
+				dx := npos.X - m.Pos.X
+
+				var yi, xi float32
+
+				if dx == 0 {
+
+					xi = npos.X
+					yi = yn
+
+				} else {
+
+					ml := dly / dx
+					dmy := npos.Y - m.Pos.Y
+					mm := dmy / dx
+
+					xi = (npos.X*(ml-mm) + npos.Y - yn) / (ml - mm)
+					yi = ln.Eval(xi)
+					//		fmt.Printf("xi: %v, yi: %v \n", xi, yi)
+				}
+
+				yl := ln.Eval(xi - .01) // point to the left of x
+				yr := ln.Eval(xi + .01) // point to the right of x
 
 				//slp := (yr - yl) / .02
 				angLn := math32.Atan2(yr-yl, 0.02)
@@ -408,8 +447,8 @@ func UpdateMarbles() {
 
 				m.Vel = gi.Vec2D{nvx, nvy}
 
-				// m.Pos.Y = y
-				break
+				m.Pos = gi.Vec2D{xi, yi}
+
 			}
 		}
 
