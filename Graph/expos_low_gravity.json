@@ -1,6 +1,6 @@
 {
   "Params": {
-    "NMarbles": 10,
+    "NMarbles": 100,
     "NSteps": 1000,
     "StartSpeed": 0,
     "UpdtRate": 0.1,
@@ -8,14 +8,14 @@
   },
   "Lines": [
     {
-      "Eq": "pow(2,-x)-8",
+      "Eq": "pow(1.5,-x)-8",
       "MinX": -10,
       "MaxX": 10,
       "Color": "black",
       "Bounce": 0.98
     },
     {
-      "Eq": "pow(2,x)-8",
+      "Eq": "pow(1.5,x)-8",
       "MinX": -10,
       "MaxX": 10,
       "Color": "red",
@@ -27,6 +27,13 @@
       "MaxX": 2.5,
       "Color": "blue",
       "Bounce": 0.98
+    },
+    {
+      "Eq": "-6",
+      "MinX": -10,
+      "MaxX": 10,
+      "Color": "green",
+      "Bounce": 1
     }
   ]
 }
