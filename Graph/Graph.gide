@@ -3,8 +3,6 @@
     "DirsOnTop": true
   },
   "Editor": {
-    "HiStyle": "emacs",
-    "FontFamily": "Go Mono",
     "TabSize": 4,
     "SpaceIndent": false,
     "WordWrap": true,
