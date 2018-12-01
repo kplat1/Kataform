@@ -262,7 +262,7 @@ func InitPlayer() {
 	player.SetProp("fill", "red")
 	player.SetProp("stroke", "darkred")
 	player.Size = gi.Vec2D{2, 2}
-	player.Pos = gi.Vec2D{1 / 4 * 5, -10}
+	player.Pos = gi.Vec2D{-12 / 4, -10}
 
 	SvgGame.UpdateEnd(updt)
 
@@ -320,7 +320,7 @@ func Jump() {
   
 // }
 
-
+var obstacle *svg.Rect
 
 func MainLoop() {
   for i := 0; i > -1; i++ {
@@ -345,27 +345,36 @@ func MainLoop() {
         }
          time.Sleep(1 * time.Millisecond)
          //fmt.Printf("%v \n", i)
-         if i == 150 {
-           rand := rand.Intn(2)
+         if i == 150 || i == 0 {
+           rand := rand.Intn(3)
            fmt.Printf("Rand: %v \n", rand)
            
            
            SvgObstacles.DeleteChildren(true)
-           obstacle := SvgObstacles.AddNewChild(svg.KiT_Rect, "obstacle").(*svg.Rect)
-           obstacle.Size = gi.Vec2D{4,4}
+           obstacle = SvgObstacles.AddNewChild(svg.KiT_Rect, "obstacle").(*svg.Rect)
+           obstacle.Size = gi.Vec2D{3,3}
            obstacle.Pos.X = 7
            obstacle.SetProp("fill", "black")
            obstacle.SetProp("stroke", "black")
            
            if rand == 0 {
-             obstacle.Pos.Y = -12
+             obstacle.Pos.Y = 7
            } else {
-             obstacle.Pos.Y = 8
+             obstacle.Pos.Y = -11
            }
            
-           
            i = 0
+           
          }
+         
+         
+           obstacle.Pos.X = obstacle.Pos.X - 0.2
+           
+           
+           
+           if  ((obstacle.Pos.X < player.Pos.X) &&  ( player.Pos.X < (obstacle.Pos.X + obstacle.Size.X)) && (obstacle.Pos.Y < player.Pos.Y) && (player.Pos.Y < obstacle.Pos.Y + obstacle.Size.Y)) ||  ((obstacle.Pos.X < player.Pos.X + player.Size.X) &&  ( player.Pos.X + player.Size.X < (obstacle.Pos.X + obstacle.Size.X)) && (obstacle.Pos.Y < player.Pos.Y + player.Size.Y) && (player.Pos.Y +player.Size.X< obstacle.Pos.Y + obstacle.Size.Y)){
+             break
+           }
          
          
 
