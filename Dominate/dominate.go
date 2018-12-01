@@ -8,7 +8,7 @@ import (
 	"fmt"
 	//"go/token"
 
-	"github.com/goki/gi"
+	"github.com/goki/gi/gi"
 	//"github.com/goki/gi/giv"
 	//"github.com/goki/gi/complete"
 	"math/rand"
@@ -259,7 +259,7 @@ func mainrun() {
 
 	playingGrid.SetProp("columns", 4)
 
-	upAction.ActionSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	upAction.ActionSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		//fmt.Printf("Received Action signal: %v from Action: %v\n", gi.ActionSignals(sig), send.Name())
 		if Players[0].curGrid-4 < 0 {
 
@@ -269,7 +269,7 @@ func mainrun() {
 		}
 	})
 
-	downAction.ActionSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	downAction.ActionSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		//fmt.Printf("Received Action signal: %v from Action: %v\n", gi.ActionSignals(sig), send.Name())
 		fmt.Printf("DOWN")
 		if Players[0].curGrid+4 > 15 {
@@ -284,7 +284,7 @@ func mainrun() {
 
 	})
 
-	rightAction.ActionSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	rightAction.ActionSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		//	fmt.Printf("Received Action signal: %v from Action: %v\n", gi.ActionSignals(sig), send.Name())
 
 		if Players[0].curGrid+1 > 15 {
@@ -296,7 +296,7 @@ func mainrun() {
 		}
 	})
 
-	leftAction.ActionSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	leftAction.ActionSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		//fmt.Printf("Received Action signal: %v from Action: %v\n", gi.ActionSignals(sig), send.Name())
 
 		if Players[0].curGrid-1 < 0 {
@@ -308,7 +308,7 @@ func mainrun() {
 		}
 	})
 
-	modeAttackAction.ActionSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	modeAttackAction.ActionSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		//fmt.Printf("Received Action signal: %v from Action: %v\n", gi.ActionSignals(sig), send.Name())
 
 		fmt.Printf("Change mode to attack")
@@ -318,7 +318,7 @@ func mainrun() {
 
 	})
 
-	modeDefenseAction.ActionSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	modeDefenseAction.ActionSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		//fmt.Printf("Received Action signal: %v from Action: %v\n", gi.ActionSignals(sig), send.Name())
 
 		fmt.Printf("Change mode to defense")
@@ -327,7 +327,7 @@ func mainrun() {
 		fmt.Printf("Current mode is %v \n", currentMode)
 
 	})
-	modeSurrenderAction.ActionSig.Connect(rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	modeSurrenderAction.ActionSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		//fmt.Printf("Received Action signal: %v from Action: %v\n", gi.ActionSignals(sig), send.Name())
 
 		fmt.Printf("Change mode to surrender!")

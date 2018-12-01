@@ -105,7 +105,7 @@
       "Files": ""
     }
   ],
-  "ProjFilename": "/home/chrx/go/src/github.com/kplat1/Kataform/Graph/Graph.gide",
+  "ProjFilename": "/home/koreilly5297/go/src/github.com/kplat1/Kataform/Graph/Graph.gide",
   "ProjRoot": "/home/chrx/go/src/github.com/kplat1/Kataform/Graph",
   "BuildCmds": [
     "Build Go Proj"
@@ -130,7 +130,7 @@
     ]
   },
   "Spell": {},
-  "OpenDirs": {},
+  "OpenDirs": null,
   "Register": "",
   "Splits": [
     0.1,
