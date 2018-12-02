@@ -39,13 +39,13 @@ type GameFrame struct {
 var KiT_GameFrame = kit.Types.AddType(&GameFrame{}, nil)
 
 func (gf *GameFrame) ConnectEvents2D() {
-	fmt.Printf("Hi \n")
+	// 	fmt.Printf("Hi \n")
 	gf.ConnectEvent(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		// fvv := recv.Embed(KiT_DomFrame).(*DomFrame)
 		kt := d.(*key.ChordEvent)
 		ch := kt.Chord()
 
-		fmt.Printf("HI2 \n")
+		// fmt.Printf("HI2 \n")
 		switch ch {
 		case "w":
 			kt.SetProcessed()
@@ -60,16 +60,13 @@ func (gf *GameFrame) HasFocus2D() bool {
 }
 func (gf *GameFrame) UpAction() {
 
-	fmt.Printf("Up action!!\n")
+	// 	fmt.Printf("Up action!!\n")
 	up, _ := gf.Row.ChildByName("upAction", 0)
 	up.(*gi.Action).Trigger()
 }
 
-
 var Jumped = false
 var VertSpeed float64 = 0 // how fast it is going down
-
-
 
 var SvgGame *svg.SVG
 var SvgEdges *svg.Group
@@ -78,6 +75,10 @@ var SvgObstacles *svg.Group
 
 var gmin, gmax, gsz, ginc gi.Vec2D
 var GameSize float32 = 200
+
+var score int = 0
+var scoreText *gi.Label
+var trow *gi.Layout
 
 func mainrun() {
 	width := 1024
@@ -129,7 +130,7 @@ func mainrun() {
 
 	// end of vars
 
-	trow := mfr.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
+	trow = mfr.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
 	trow.Lay = gi.LayoutVert
 	trow.SetStretchMaxWidth()
 
@@ -146,35 +147,30 @@ func mainrun() {
 	title.SetStretchMaxHeight()
 
 	trow.AddNewChild(gi.KiT_Space, "spc1")
+	scoreText = trow.AddNewChild(gi.KiT_Label, "scoreText").(*gi.Label)
+	scoreText.Text = "Score: 0                       "
+	scoreText.Redrawable = true
 	gfr := mfr.AddNewChild(KiT_GameFrame, "gameframe").(*GameFrame)
 	gfr.SetProp("background-color", "white")
 
 	gfr.Row = mfr.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
 	gfr.Row.Lay = gi.LayoutHoriz
 
-
-start := gfr.Row.AddNewChild(gi.KiT_Action, "start").(*gi.Action)
-start.Text = "Start!"
+	start := gfr.Row.AddNewChild(gi.KiT_Action, "start").(*gi.Action)
+	start.Text = "Start!"
 
 	start.ActionSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		go MainLoop()
-		
-		
 
 	})
-
 
 	upAction := gfr.Row.AddNewChild(gi.KiT_Action, "upAction").(*gi.Action)
 	upAction.Text = "Jump!"
 
 	upAction.ActionSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		fmt.Printf("Jump! \n")
-		
-		
-		
+		// fmt.Printf("Jump! \n")
+
 		Jump()
-		
-		
 
 	})
 
@@ -250,7 +246,6 @@ func InitEdges() {
 	SvgGame.UpdateEnd(updt)
 }
 
-
 var player *svg.Rect
 
 func InitPlayer() {
@@ -268,30 +263,29 @@ func InitPlayer() {
 
 }
 
-
 func Jump() {
-  if Jumped {
-    return
-  } else {
-    VertSpeed = 1
-    Jumped = true
-    
-  }
+	if Jumped {
+		return
+	} else {
+		VertSpeed = 1
+		Jumped = true
+
+	}
 }
+
 // func JumpLoop() {
 //   fmt.Printf("HIII \n")
-  	
 
 //   for y := -9.9; y > -10; y++ {
 //     updt := SvgGame.UpdateStart()
 //     if y < 10 {
-      
+
 //       if VertSpeed == 1 {
 //       player.Pos.Y = float32(y)
 //       } else {
 //         player.Pos.Y = float32(y) - 2
 //       }
-      
+
 //     } else {
 //       fmt.Printf("Coming down \n")
 //           SvgGame.UpdateEnd(updt)
@@ -300,88 +294,94 @@ func Jump() {
 //     }
 //     SvgGame.UpdateEnd(updt)
 //     time.Sleep(1 * time.Millisecond)
-    
+
 //   }
 //   JumpLoopDown()
-  
+
 // }
 
 // func JumpLoopDown() {
 //   fmt.Printf("Coming down func \n")
-  
+
 //   for y := player.Pos.Y; y >= -10; y-- {
 //     updt := SvgGame.UpdateStart()
 //     player.Pos.Y = float32(y)
 //     SvgGame.UpdateEnd(updt)
 //     fmt.Printf("Updated before this! \n")
 //     time.Sleep(1 * time.Millisecond)
-    
+
 //   }
-  
+
 // }
 
 var obstacle *svg.Rect
 
 func MainLoop() {
-  for i := 0; i > -1; i++ {
-    
-        updt := SvgGame.UpdateStart()
-        
-        
-        if Jumped == true {
-          if VertSpeed == 1 {
-            if player.Pos.Y + 1 <= 10 {
-              player.Pos.Y = player.Pos.Y + 1
-            } else {
-              VertSpeed = -1
-            }
-          } else if VertSpeed == -1 {
-            if player.Pos.Y - 1 >= -10 {
-              player.Pos.Y = player.Pos.Y -1
-            } else {
-              Jumped = false
-            }
-          }
-        }
-         time.Sleep(1 * time.Millisecond)
-         //fmt.Printf("%v \n", i)
-         if i == 150 || i == 0 {
-           rand := rand.Intn(3)
-           fmt.Printf("Rand: %v \n", rand)
-           
-           
-           SvgObstacles.DeleteChildren(true)
-           obstacle = SvgObstacles.AddNewChild(svg.KiT_Rect, "obstacle").(*svg.Rect)
-           obstacle.Size = gi.Vec2D{3,3}
-           obstacle.Pos.X = 7
-           obstacle.SetProp("fill", "black")
-           obstacle.SetProp("stroke", "black")
-           
-           if rand == 0 {
-             obstacle.Pos.Y = 7
-           } else {
-             obstacle.Pos.Y = -11
-           }
-           
-           i = 0
-           
-         }
-         
-         
-           obstacle.Pos.X = obstacle.Pos.X - 0.2
-           
-           
-           
-           if  ((obstacle.Pos.X < player.Pos.X) &&  ( player.Pos.X < (obstacle.Pos.X + obstacle.Size.X)) && (obstacle.Pos.Y < player.Pos.Y) && (player.Pos.Y < obstacle.Pos.Y + obstacle.Size.Y)) ||  ((obstacle.Pos.X < player.Pos.X + player.Size.X) &&  ( player.Pos.X + player.Size.X < (obstacle.Pos.X + obstacle.Size.X)) && (obstacle.Pos.Y < player.Pos.Y + player.Size.Y) && (player.Pos.Y +player.Size.X< obstacle.Pos.Y + obstacle.Size.Y)){
-             break
-           }
-         
-         
+	obstaclePassed := false
+	for i := 0; i > -1; i++ {
 
-        
-        
-        
-    SvgGame.UpdateEnd(updt)
+		updt := SvgGame.UpdateStart()
 
-  }
+		if Jumped == true {
+			if VertSpeed == 1 {
+				if player.Pos.Y+1 <= 10 {
+					player.Pos.Y = player.Pos.Y + 1
+				} else {
+					VertSpeed = -1
+				}
+			} else if VertSpeed == -1 {
+				if player.Pos.Y-1 >= -10 {
+					player.Pos.Y = player.Pos.Y - 1
+				} else {
+					Jumped = false
+				}
+			}
+		}
+		time.Sleep(1 * time.Millisecond)
+		//fmt.Printf("%v \n", i)
+		if i == 150 || i == 0 {
+			rand := rand.Intn(3)
+			// 	fmt.Printf("Rand: %v \n", rand)
+
+			SvgObstacles.DeleteChildren(true)
+
+			obstaclePassed = false
+			obstacle = SvgObstacles.AddNewChild(svg.KiT_Rect, "obstacle").(*svg.Rect)
+			obstacle.Size = gi.Vec2D{3, 3}
+			obstacle.Pos.X = 7
+			obstacle.SetProp("fill", "black")
+			obstacle.SetProp("stroke", "black")
+
+			if rand == 0 {
+				obstacle.Pos.Y = 7
+			} else {
+				obstacle.Pos.Y = -11
+			}
+
+			i = 0
+
+		}
+
+		obstacle.Pos.X = obstacle.Pos.X - 0.2
+
+		if ((obstacle.Pos.X < player.Pos.X) && (player.Pos.X < (obstacle.Pos.X + obstacle.Size.X)) && (obstacle.Pos.Y < player.Pos.Y) && (player.Pos.Y < obstacle.Pos.Y+obstacle.Size.Y)) || ((obstacle.Pos.X < player.Pos.X+player.Size.X) && (player.Pos.X+player.Size.X < (obstacle.Pos.X + obstacle.Size.X)) && (obstacle.Pos.Y < player.Pos.Y+player.Size.Y) && (player.Pos.Y+player.Size.X < obstacle.Pos.Y+obstacle.Size.Y)) {
+			break
+		}
+
+		SvgGame.UpdateEnd(updt)
+		if (obstacle.Pos.X+obstacle.Size.X < player.Pos.X) && (!obstaclePassed) {
+			obstaclePassed = true
+			score++
+
+			AddScore()
+
+		}
+
+	}
+}
+func AddScore() {
+	//fmt.Printf("Score! \n")
+
+	scoreText.SetText(fmt.Sprintf("Score: %v", score))
+	//	fmt.Printf("SCORE: %v\n", scoreText.Text)
 }
