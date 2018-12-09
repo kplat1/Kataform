@@ -114,17 +114,19 @@ func mainrun() {
 	// END BLOCK TYPES
 
 	// THE MAP
-
-	Map = append(Map, mapRow{"dirtLayer1", "dirtLayer", 0, 0, 0}) // creates a new thing to the map
-	
-	
-	
-	
-	Map = append(Map, mapRow{"grassLayer1", "grassLayer", 0, 0, 1})
-	Map = append(Map, mapRow{"woodStore1", "woodStore", 0, 0, 2})
-	Map = append(Map, mapRow{"woodBlock1", "woodBlock", -7, -3, 2})
-		Map = append(Map, mapRow{"stoneBlock1", "stoneBlock", -9, -3, 2})
-			Map = append(Map, mapRow{"metalBlock1", "metalBlock", -11, -3, 2})
+Map = append(Map, mapRow{"dirtLayer1", "dirtLayer", 0, 0, 0})
+Map = append(Map, mapRow{"grassLayer1", "grassLayer", 0, 0, 1})
+Map = append(Map, mapRow{"woodBlock1", "woodBlock", 1, 1, 2})
+Map = append(Map, mapRow{"woodStore1", "woodStore", 2, -2, 2})
+Map = append(Map, mapRow{"waterLayer1", "waterLayer",0 ,0 ,5 })
+Map = append(Map, mapRow{"woodBlock2", "woodBlock",0 ,0 , 6})
+Map = append(Map, mapRow{"stoneStore1", "stoneStore",-2 , 2, 2})
+Map = append(Map, mapRow{"stoneStore2", "stoneStore",3 ,2 ,2 })
+Map = append(Map, mapRow{"stoneStore3", "stoneStore",6 , 5, 2})
+Map = append(Map, mapRow{"roundRock1", "roundRock",-5 ,4 , 2})
+Map = append(Map, mapRow{"stoneStore4", "stoneStore",2 , 5, 2})
+Map = append(Map, mapRow{"roundRock2", "roundRock",4 , 5, 2})
+Map = append(Map, mapRow{"cobblestone1", "cobblestone", -2, 3, 2})
 
 	// END OF THE MAP
 
@@ -144,10 +146,10 @@ func mainrun() {
 
 var imgSize float32 = 400
 
-
-	for i := 0; i < len(Map); i++ {
-
-		if Map[i].typeOf == "dirtLayer" {
+	
+		
+		for i := 0; i < len(Map); i++ {
+		  if Map[i].typeOf == "dirtLayer" {
 			updt := vp.UpdateStart()
 
 			dirtLayerText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("dirtLayerText%v", i)).(*gi.Label)
@@ -158,6 +160,21 @@ var imgSize float32 = 400
 
 			vp.UpdateEnd(updt)
 
+		} else if Map[i].typeOf == "cobblestone" { // ELSE IF
+		
+		updt := vp.UpdateStart()
+
+			cobblestoneText := trow.AddNewChild(gi.KiT_Label, fmt.Sprintf("cobblestoneText%v", i)).(*gi.Label)
+			cobblestoneText.Text = fmt.Sprintf("Row %v is a Cobblestone at x position %v and y position %v. It is at height %v.", i, Map[i].x, Map[i].y, Map[i].z)
+
+			imgCobblestone := trow.AddNewChild(gi.KiT_Bitmap, fmt.Sprintf("imgCobblestone%v", i)).(*gi.Bitmap)
+			imgCobblestone.OpenImage("cobblestone.jpg", imgSize, imgSize)
+
+			vp.UpdateEnd(updt)
+		
+		
+		
+		
 		} else if Map[i].typeOf == "grassLayer" {
 			updt := vp.UpdateStart()
 
@@ -268,7 +285,7 @@ var imgSize float32 = 400
 
 			vp.UpdateEnd(updt)
 		}
-	}
+		}
 
 	/*	inputConfirm := trow.AddNewChild(gi.KiT_Button, "inputConfirm").(*gi.Button)
 		inputConfirm.Text = "Done"
