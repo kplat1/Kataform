@@ -179,6 +179,21 @@ func mainrun() {
 
 	gfr.Row = mfr.AddNewChild(gi.KiT_Layout, "brow").(*gi.Layout)
 	gfr.Row.Lay = gi.LayoutHoriz
+	
+	
+	start := gfr.Row.AddNewChild(gi.KiT_Action, "start").(*gi.Action)
+	start.Text = "Start!"
+
+	start.ActionSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	  updt := SvgGame.UpdateStart()
+	  
+	go MainLoop()
+	
+	SvgGame.UpdateEnd(updt)
+
+	})
+	
+	
 
 	upAction := gfr.Row.AddNewChild(gi.KiT_Action, "upAction").(*gi.Action)
 	upAction.Text = "Move Up!"
