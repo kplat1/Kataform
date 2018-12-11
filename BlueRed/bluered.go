@@ -33,6 +33,7 @@ func (gf *GameFrame) ConnectEvents2D() {
 	gf.ConnectEvent(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		// fvv := recv.Embed(KiT_DomFrame).(*DomFrame)
 		kt := d.(*key.ChordEvent)
+
 		ch := kt.Chord()
 
 		// fmt.Printf("HI2 \n")
