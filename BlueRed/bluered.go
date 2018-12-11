@@ -390,7 +390,15 @@ func MainLoop() {
 	for i := 0; i > 0; i++ {
 
 		updt := SvgGame.UpdateStart()
-
+		
+		if (player.Pos.X + player.Size.X > 8) || (player.Pos.X < -8) {
+		  if player.Pos.X > 0 {
+		    player.Pos.X = 6
+		  } else {
+		    player.Pos.X = -8
+		  }
+		}
+ 
 		SvgGame.UpdateEnd(updt)
 
 	}
