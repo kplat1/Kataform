@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sync"
 
+	"math/rand"
+
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/oswin"
@@ -25,6 +27,14 @@ type GameFrame struct {
 	Row *gi.Layout
 	gi.Frame
 }
+
+type Dot struct {
+	Pos  gi.Vec2D
+	Blue bool
+	Vel  gi.Vec2D
+}
+
+var Dots []Dot
 
 var KiT_GameFrame = kit.Types.AddType(&GameFrame{}, nil)
 
@@ -83,6 +93,7 @@ func (gf *GameFrame) LeftAction() {
 var SvgGame *svg.SVG
 var SvgPeople *svg.Group
 var SvgMap *svg.Group
+var SvgDots *svg.Group
 
 var gmin, gmax, gsz, ginc gi.Vec2D
 var GameSize float32 = 800
@@ -90,6 +101,7 @@ var GameSize float32 = 800
 var Mu sync.Mutex
 
 var trow *gi.Layout
+var scoreText *gi.Label
 
 func mainrun() {
 	width := 1024
@@ -156,6 +168,10 @@ func mainrun() {
 	title.SetProp("line-height", 1.5)
 	title.SetStretchMaxWidth()
 	title.SetStretchMaxHeight()
+
+	scoreText = trow.AddNewChild(gi.KiT_Label, "scoreText").(*gi.Label)
+	scoreText.Text = "Score: 0      "
+	scoreText.Redrawable = true
 
 	trow.AddNewChild(gi.KiT_Space, "spc1")
 
@@ -237,6 +253,7 @@ func mainrun() {
 
 	SvgPeople = SvgGame.AddNewChild(svg.KiT_Group, "SvgPeople").(*svg.Group)
 	SvgMap = SvgGame.AddNewChild(svg.KiT_Group, "SvgMap").(*svg.Group)
+	SvgDots = SvgMap.AddNewChild(svg.KiT_Group, "SvgDots").(*svg.Group)
 
 	gmin = gi.Vec2D{-10, -10}
 	gmax = gi.Vec2D{10, 10}
@@ -373,6 +390,10 @@ func InitPlayer() {
 // }
 
 var obstacle *svg.Rect
+var NumDots = 5
+var score = 0
+
+var Blue, _ = gi.ColorFromString("blue", gi.Color{})
 
 func MainLoop() {
 	// 	fmt.Printf("hi \n")
@@ -382,6 +403,7 @@ func MainLoop() {
 		Mu.Lock()
 
 		updt := SvgGame.UpdateStart()
+
 		// fmt.Printf("Num: %v \n", player.Pos.X)
 
 		if player.Pos.X < -10 {
@@ -396,8 +418,108 @@ func MainLoop() {
 			player.Pos.Y = 6
 		}
 
+		if i == 0 {
+			SvgDots.DeleteChildren(true)
+
+			for d := 0; d < 6; d++ {
+
+				// fmt.Printf("Random: %v \n", random)
+				random1 := rand.Intn(6)
+				random2 := rand.Intn(6)
+				random3 := rand.Float64() * 10
+				random4 := rand.Float64() * 10
+				random5 := rand.Float64()
+				var random3new = int(random3)
+				var random4new = int(random4)
+				random3 = float64(random3new)
+				random4 = float64(random4new)
+
+				divnum := 250
+				negpos := 0
+				//fmt.Printf("Float: %v, total: %v, result: %v\n", float32(random3), float32(random3+1), float32(random3+1/divnum))
+
+				velx := float32(random3 / float64(divnum))
+				vely := float32(random4 / float64(divnum))
+
+				vel := gi.Vec2D{velx, vely}
+				fmt.Printf("Velocity: %v \n", vel)
+
+				if random5 < 5 {
+					negpos = -1
+				} else {
+					negpos = 1
+				}
+
+				if d < 3 {
+					dot := SvgDots.AddNewChild(svg.KiT_Circle, fmt.Sprintf("dot%v", d)).(*svg.Circle)
+					dot.SetProp("fill", "blue")
+					dot.SetProp("stroke", "darkblue")
+					dot.Pos = gi.Vec2D{float32(random1 * negpos), float32(random2 * negpos)}
+					dot.Radius = 1
+					Dots = append(Dots, Dot{dot.Pos, true, vel})
+				} else {
+					dot := SvgDots.AddNewChild(svg.KiT_Circle, fmt.Sprintf("dot%v", d)).(*svg.Circle)
+					dot.SetProp("fill", "red")
+					dot.SetProp("stroke", "darkred")
+					dot.Pos = gi.Vec2D{float32(random1 * negpos), float32(random2 * negpos)}
+					dot.Radius = 1
+					Dots = append(Dots, Dot{dot.Pos, false, vel})
+				}
+			}
+
+		}
+		fmt.Printf("Pos: %v \n", Dots[0].Pos)
+
+		for n := 0; n < len(*SvgDots.Children()); n++ {
+
+			if ((player.Pos.X+1+1) >= (Dots[n].Pos.X) && (Dots[n].Pos.X) >= (player.Pos.X+1-1)) && ((player.Pos.Y+1+1) >= (Dots[n].Pos.Y) && (Dots[n].Pos.Y) >= (player.Pos.Y+1-1)) {
+				// fmt.Printf("Point! \n")
+				random1 := rand.Intn(6)
+				random2 := rand.Intn(6)
+				Dots[n].Pos = gi.Vec2D{float32(random1), float32(random2)}
+				svgdot := SvgDots.KnownChild(n).(*svg.Circle)
+				svgdot.Pos = Dots[n].Pos
+
+				if Dots[n].Blue {
+					score++
+					ScoreFunc()
+
+				} else {
+					score--
+					ScoreFunc()
+				}
+				fmt.Printf("Score: %v \n", score)
+			}
+
+		}
+
+		for v := 0; v < len(Dots); v++ {
+			Dots[v].Pos.X += Dots[v].Vel.X
+			Dots[v].Pos.Y += Dots[v].Vel.Y
+			dot := SvgDots.KnownChild(v).(*svg.Circle)
+			dot.Pos = Dots[v].Pos
+
+			if Dots[v].Pos.X > 9 || Dots[v].Pos.X < -9 {
+				Dots[v].Vel.X *= float32(-1)
+			}
+			if Dots[v].Pos.Y > 7 || Dots[v].Pos.Y < -7 {
+				Dots[v].Vel.Y *= float32(-1)
+			}
+
+		}
+
+		if score < 0 {
+			score = 0
+		}
+
 		SvgGame.UpdateEnd(updt)
 		Mu.Unlock()
 
 	}
+}
+
+func ScoreFunc() {
+
+	scoreText.SetText(fmt.Sprintf("Score: %v", score))
+
 }
