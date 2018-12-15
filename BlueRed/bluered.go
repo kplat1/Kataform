@@ -452,7 +452,7 @@ func MainLoop() {
 				random3 = float64(random3new)
 				random4 = float64(random4new)
 
-				divnum := 125
+				divnum := 35
 				negpos := 0
 				//fmt.Printf("Float: %v, total: %v, result: %v\n", float32(random3), float32(random3+1), float32(random3+1/divnum))
 
