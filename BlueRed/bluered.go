@@ -44,6 +44,10 @@ func (gf *GameFrame) ConnectEvents2D() {
 		// fvv := recv.Embed(KiT_DomFrame).(*DomFrame)
 		kt := d.(*key.ChordEvent)
 		ch := kt.Chord()
+		// down := ch.FromString("MoveDown")
+		// up := ch.FromString("MoveUp")
+		// left := ch.FromString("MoveLeft")
+		// right := ch.FromString("MoveRight")
 
 		// fmt.Printf("HI2 \n")
 		switch ch {
@@ -59,9 +63,23 @@ func (gf *GameFrame) ConnectEvents2D() {
 		case "d":
 			kt.SetProcessed()
 			gf.RightAction()
-		}
-	})
 
+			// case up:
+			// 	kt.SetProcessed()
+			// 	gf.UpAction()
+			// case down:
+			// 	kt.SetProcessed()
+			// 	gf.DownAction()
+			// case right:
+			// 	kt.SetProcessed()
+			// 	gf.RightAction()
+			// case left:
+			// 	kt.SetProcessed()
+			// gf.LeftAction()
+
+		}
+
+	})
 }
 
 func (gf *GameFrame) HasFocus2D() bool {
@@ -170,7 +188,7 @@ func mainrun() {
 	title.SetStretchMaxHeight()
 
 	scoreText = trow.AddNewChild(gi.KiT_Label, "scoreText").(*gi.Label)
-	scoreText.Text = "Score: 0      "
+	scoreText.Text = "Score: 0                                "
 	scoreText.Redrawable = true
 
 	trow.AddNewChild(gi.KiT_Space, "spc1")
@@ -520,6 +538,6 @@ func MainLoop() {
 
 func ScoreFunc() {
 
-	scoreText.SetText(fmt.Sprintf("Score: %v", score))
+	scoreText.SetText(fmt.Sprintf("Score: %v       ", score))
 
 }
