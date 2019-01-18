@@ -5,6 +5,7 @@ import (
 	//"go/token"
 
 	"github.com/goki/gi/gi"
+
 	//"github.com/goki/gi/giv"
 	//"github.com/goki/gi/complete"
 	// 	"math/rand"
@@ -97,6 +98,7 @@ var Teams []team
 var tab0frame *gi.Layout
 var TEAM string
 var tv *gi.TabView
+var vp *gi.Viewport2D
 
 func mainrun() {
 
@@ -117,7 +119,7 @@ func mainrun() {
 
 	win := gi.NewWindow2D("game", "Game", width, height, true) // true = pixel sizes
 
-	vp := win.WinViewport2D()
+	vp = win.WinViewport2D()
 	updt := vp.UpdateStart()
 
 	// style sheet
@@ -238,7 +240,7 @@ func mainrun() {
 						if sig == int64(gi.DialogAccepted) {
 							// 	val := gi.StringPromptDialogValue(dlg)
 							// 	fmt.Printf("got string value: %v\n", val)
-              tv.DeleteTabIndex(0, true)
+							tv.DeleteTabIndex(0, true)
 							playerSetup()
 						}
 					})
@@ -427,20 +429,24 @@ func teamSelect() {
 
 }
 
-var draftRound = 0
+var draftRound = 1
+var Player1 string
 
 func playerSetup() {
-  
+
 	tab1k, _ := tv.AddNewTab(gi.KiT_Layout, "Draft")
-	
+
 	updt := tab1k.UpdateStart()
 	defer tab1k.UpdateEnd(updt)
-	
+	rec := ki.Node{}          // receiver for events
+	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
+
 	bigFrame := tab1k.(*gi.Layout)
 	bigFrame.Lay = gi.LayoutVert
 
 	draftHeader := bigFrame.AddNewChild(gi.KiT_Label, "draftHeader").(*gi.Label)
-	draftHeader.Text = "<b>Welcome to the first round of the draft! Pick wisely.</b>"
+	draftHeader.Text = "<b>Welcome to the first round of the draft! Pick wisely.                      </b>"
+	draftHeader.Redrawable = true
 	draftHeader.SetProp("font-size", "x-large")
 
 	draftFrame := bigFrame.AddNewChild(gi.KiT_Layout, "draftFrame").(*gi.Layout)
@@ -452,7 +458,7 @@ func playerSetup() {
 
 		playerName := playerFrame.AddNewChild(gi.KiT_Button, fmt.Sprintf("playerName%v", i)).(*gi.Button)
 		playerName.Text = fmt.Sprintf("<b>%v</b>", Players[i].Name)
-		playerName.SetProp("font-size", "x-large")
+		// playerName.SetProp("label", ki.Props{"font-size": "x-large"})
 
 		property1 := playerFrame.AddNewChild(gi.KiT_Label, fmt.Sprintf("property1%v", i)).(*gi.Label)
 		property2 := playerFrame.AddNewChild(gi.KiT_Label, fmt.Sprintf("property2%v", i)).(*gi.Label)
@@ -478,8 +484,35 @@ func playerSetup() {
 		property8.Text = fmt.Sprintf("<b>Game Film</b>: %v", Players[i].GameFilm)
 		property8.SetProp("width", "50ch")
 		property8.SetProp("white-space", "normal")
-		prop5text := playerFrame.KnownChild(5).(*gi.Label)
-		fmt.Printf("Property 5: %v \n", prop5text.Text)
+		// prop5text := playerFrame.KnownChild(5).(*gi.Label)
+		// fmt.Printf("Property 5: %v \n", )
+
+		playerName.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
+			if sig == int64(gi.ButtonClicked) {
+
+				fmt.Printf("Player Name: %v \n", playerName.Text)
+				splits := strings.Split(playerName.Text, "<b>")
+				player1 := splits[1]
+
+				player2 := strings.Split(player1, "</b>")
+				player3 := player2[0]
+				fmt.Printf("Player3: %v \n", player3)
+
+				Player1 = player3
+
+				gi.StringPromptDialog(vp, "", "Don't enter anything here -- Nothing will be done if you enter anything.",
+					gi.DlgOpts{Title: "Confirmation", Prompt: fmt.Sprintf("Are you sure you want to select %v and move on to the second round of the draft?", Player1)},
+					rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+						//dlg := send.(*gi.Dialog)
+						if sig == int64(gi.DialogAccepted) {
+							draftRound = 2
+							draftHeader.SetText("<b>Welcome to the second round of the draft! Pick wisely.</b>")
+						}
+					})
+
+			}
+		})
 
 	}
 }
