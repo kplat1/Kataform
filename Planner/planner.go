@@ -261,6 +261,41 @@ func mainrun() {
 				} else if c == 7 {
 					text.Text = "Saturday"
 				}
+			} else if c == 0 {
+				text := cell.AddNewChild(gi.KiT_Label, fmt.Sprintf("cell_%v_%v", r, c)).(*gi.Label)
+				cell.SetProp("background-color", "lightgreen")
+				if r == 1 {
+					text.Text = "All Day"
+				} else if r == 2 {
+					text.Text = "7 AM"
+				} else if r == 3 {
+					text.Text = "8 AM"
+				} else if r == 4 {
+					text.Text = "9 AM"
+				} else if r == 5 {
+					text.Text = "10 AM"
+				} else if r == 6 {
+					text.Text = "11 AM"
+				} else if r == 7 {
+					text.Text = "12 PM"
+				} else if r == 8 {
+					text.Text = "1 PM"
+				} else if r == 9 {
+					text.Text = "2 PM"
+				} else if r == 10 {
+					text.Text = "3 PM"
+				} else if r == 11 {
+					text.Text = "4 PM"
+				} else if r == 12 {
+					text.Text = "5 PM"
+				} else if r == 13 {
+					text.Text = "6 PM"
+				} else if r == 14 {
+					text.Text = "7 PM"
+				} else if r == 15 {
+					text.Text = "8 PM"
+				}
+
 			}
 
 		}
