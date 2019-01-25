@@ -393,6 +393,7 @@ func drawPlayingGrid(playingGrid *gi.Layout) {
 			cell.SetProp("border-width", "4px")
 			cell.SetProp("width", "5em")
 			cell.SetProp("height", "5em")
+			
 
 			for i := 0; i < len(Players); i++ {
 				if gridPos == Players[i].curGrid {

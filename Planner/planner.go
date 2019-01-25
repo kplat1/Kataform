@@ -9,13 +9,16 @@ import (
 	"fmt"
 	"io/ioutil"
 	"time"
+
 	//"reflect"
 
-	"github.com/goki/gi"
+	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
+	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/kit"
+
 	//"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	//"github.com/goki/ki/kit"
@@ -208,20 +211,75 @@ func mainrun() {
 	title.SetProp("align-vert", gi.AlignTop)
 	title.SetProp("font-size", "x-large")
 
-	split := mfr.AddNewChild(gi.KiT_SplitView, "split").(*gi.SplitView)
+	tabview := mfr.AddNewChild(gi.KiT_TabView, "tabview").(*gi.TabView)
+	tab1, _ := tabview.AddNewTab(gi.KiT_SplitView, "Goals")
+
+	split := tab1.(*gi.SplitView)
+	// split.SetProp("height", "20em")
+
+	tab2, _ := tabview.AddNewTab(gi.KiT_Layout, "Calendar")
+
+	calendarGrid := tab2.(*gi.Layout)
+	calendarGrid.Lay = gi.LayoutGrid
+	rows := 16
+	cols := 8
+
+	calendarGrid.SetProp("columns", cols)
+	calendarGrid.SetProp("max-width", -1)
+	calendarGrid.SetProp("max-height", -1)
+
+	for r := 0; r < rows; r++ {
+
+		for c := 0; c < cols; c++ {
+			cell := calendarGrid.AddNewChild(gi.KiT_Frame, fmt.Sprintf("cell_%v_%v", r, c)).(*gi.Frame)
+			cell.SetProp("background-color", "white")
+
+			cell.SetProp("border-color", "black")
+			cell.SetProp("border-width", "2px")
+			cell.SetProp("max-width", -1)
+			cell.SetProp("max-height", -1)
+			cell.SetProp("min-height", "2em")
+
+			if r == 0 {
+				text := cell.AddNewChild(gi.KiT_Label, fmt.Sprintf("cell_%v_%v", r, c)).(*gi.Label)
+				cell.SetProp("background-color", "lightgreen")
+				if c == 0 {
+					cell.SetProp("background-color", "black")
+				}
+				if c == 1 {
+					text.Text = "Sunday"
+				} else if c == 2 {
+					text.Text = "Monday"
+				} else if c == 3 {
+					text.Text = "Tuesday"
+				} else if c == 4 {
+					text.Text = "Wednesday"
+				} else if c == 5 {
+					text.Text = "Thursday"
+				} else if c == 6 {
+					text.Text = "Friday"
+				} else if c == 7 {
+					text.Text = "Saturday"
+				}
+			}
+
+		}
+
+	}
 
 	tv := split.AddNewChild(giv.KiT_TableView, "tv").(*giv.TableView)
+	// tv.SetProp("height", "20em")
 	tv.Viewport = vp
 	sv := split.AddNewChild(giv.KiT_StructView, "sv").(*giv.StructView)
 	sv.Viewport = vp
-
+	// split0.SetSplits(.5, .5)
 	split.SetSplits(.5, .5)
 
 	ThePlan = make(PlannerTable, 0, 1000)
 
 	tv.SetSlice(&ThePlan, nil)
 
-	tv.WidgetSig.Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	tv.WidgetSig.Connect(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.WidgetSelected) {
 			idx := tv.SelectedIdx
 			if idx >= 0 {
@@ -304,6 +362,20 @@ func mainrun() {
 	// 		})
 	// 	}
 	// })
+
+	appnm := oswin.TheApp.Name()
+	mmen := win.MainMenu
+	mmen.ConfigMenus([]string{appnm, "Edit", "Window"})
+
+	amen := win.MainMenu.KnownChildByName(appnm, 0).(*gi.Action)
+	amen.Menu = make(gi.Menu, 0, 10)
+	amen.Menu.AddAppMenu(win)
+
+	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
+	emen.Menu = make(gi.Menu, 0, 10)
+	emen.Menu.AddCopyCutPaste(win)
+
+	win.MainMenuUpdated()
 
 	vp.UpdateEndNoSig(updt)
 
