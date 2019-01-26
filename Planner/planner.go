@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"time"
 
 	//"reflect"
 
@@ -27,16 +26,22 @@ import (
 	//"time"
 )
 
-type PlanTime time.Time
+//
+// type PlanTime time.Time
+//
+// func (ft PlanTime) String() string {
+// 	return (time.Time)(ft).Format("Mon Jan  2 15 MST 2006")
+// }
 
-func (ft PlanTime) String() string {
-	return (time.Time)(ft).Format("Mon Jan  2 15 MST 2006")
+type DayTime struct {
+	Day  string
+	Time string
 }
 
 type PlannerRec struct {
 	Goal      string
 	Role      string
-	DoDate    PlanTime `desc:"date when you want to do it"`
+	DayTimes  []DayTime
 	Completed bool
 }
 
@@ -78,6 +83,64 @@ func (pr *PlannerTable) LoadDefault() error {
 	return pr.Load("default_plan_table.json")
 }
 
+func (pr *PlannerTable) GetGoals() []string {
+	sa := make([]string, len(*pr)+1)
+	sa[0] = SelectGoalStr
+	for r := range *pr {
+		rec := (*pr)[r]
+		sa[r+1] = rec.Goal
+	}
+	return sa
+}
+func (pr *PlannerTable) SetGoalTime(goal, day, time string) {
+	newdt := DayTime{day, time}
+
+	fmt.Printf("Goal: %v Day: %v Time: %v \n", goal, day, time)
+	for r := range *pr {
+		rec := (*pr)[r]
+		if rec.Goal == goal {
+			rec.DayTimes = append(rec.DayTimes, newdt)
+
+		} else {
+			for di, dt := range rec.DayTimes { // check if it has been changed
+				if dt == newdt {
+					rec.DayTimes = append(rec.DayTimes[0:di], rec.DayTimes[di+1:]...) // delete index di
+
+				}
+			}
+		}
+	}
+	pr.SaveDefault()
+	pr.UpdateCalendar(CalendarGrid)
+}
+
+func (pr *PlannerTable) UpdateCalendar(cal *gi.Layout) {
+	// fmt.Printf("Goal: %v Day: %v Time: %v \n", goal, day, time)
+	pr.ClearCalendar(CalendarGrid)
+	for r := range *pr {
+		rec := (*pr)[r]
+		for _, dt := range rec.DayTimes {
+			row := TimeToRow[dt.Time]
+			col := DayToCol[dt.Day]
+			index := (8 * row) + col
+			frame := cal.KnownChild(index).(*gi.Frame)
+			cb := frame.KnownChild(0).(*gi.ComboBox)
+			cb.SetCurVal(rec.Goal)
+		}
+	}
+}
+
+func (pr *PlannerTable) ClearCalendar(cal *gi.Layout) {
+	for row := 1; row < len(Times); row++ {
+		for col := 1; col < len(Days); col++ {
+			index := (8 * row) + col
+			frame := cal.KnownChild(index).(*gi.Frame)
+			cb := frame.KnownChild(0).(*gi.ComboBox)
+			cb.SetCurVal(SelectGoalStr)
+		}
+	}
+}
+
 var KiT_PlannerTable = kit.Types.AddType(&PlannerTable{}, PlannerTableProps)
 
 var PlannerTableProps = ki.Props{
@@ -97,18 +160,73 @@ var PlannerTableProps = ki.Props{
 		{"Window", "Windows"},
 	},
 	"ToolBar": ki.PropSlice{
-		{"SaveDefault", ki.Props{
-			"label": "Save",
-			"icon":  "file-save",
-		}},
-		{"LoadDefault", ki.Props{
-			"label": "Load",
-			"icon":  "file-save",
-		}},
+		// {"SaveDefault", ki.Props{
+		// 	"label": "Save",
+		// 	"icon":  "file-save",
+		// }},
+		// {"LoadDefault", ki.Props{
+		// 	"label": "Load",
+		// 	"icon":  "file-save",
+		// }},
 	},
 }
 
+var CalendarGrid *gi.Layout
+
 var ThePlan PlannerTable
+
+var SelectGoalStr = "Select a goal"
+
+var Times = map[int]string{
+	1:  "All Day",
+	2:  "7 AM",
+	3:  "8 AM",
+	4:  "9 AM",
+	5:  "10 AM",
+	6:  "11 AM",
+	7:  "12 PM",
+	8:  "1 PM",
+	9:  "2 PM",
+	10: "3 PM",
+	11: "4 PM",
+	12: "5 PM",
+	13: "6 PM",
+	14: "7 PM",
+	15: "8 PM",
+}
+
+var TimeToRow map[string]int
+
+func initTimeToRow() {
+	TimeToRow = make(map[string]int, len(Times))
+	for k, v := range Times {
+		TimeToRow[v] = k
+	}
+}
+
+var Days = map[int]string{
+	1: "Sunday",
+	2: "Monday",
+	3: "Tuesday",
+	4: "Wednesday",
+	5: "Thursday",
+	6: "Friday",
+	7: "Saturday",
+}
+
+var DayToCol map[string]int
+
+func initDayToCol() {
+	DayToCol = make(map[string]int, len(Days))
+	for k, v := range Days {
+		DayToCol[v] = k
+	}
+}
+
+func init() {
+	initTimeToRow()
+	initDayToCol()
+}
 
 // var PlannerDB *bolt.DB
 
@@ -219,19 +337,25 @@ func mainrun() {
 
 	tab2, _ := tabview.AddNewTab(gi.KiT_Layout, "Calendar")
 
-	calendarGrid := tab2.(*gi.Layout)
-	calendarGrid.Lay = gi.LayoutGrid
+	CalendarGrid = tab2.(*gi.Layout)
+	CalendarGrid.Lay = gi.LayoutGrid
 	rows := 16
 	cols := 8
 
-	calendarGrid.SetProp("columns", cols)
-	calendarGrid.SetProp("max-width", -1)
-	calendarGrid.SetProp("max-height", -1)
+	CalendarGrid.SetProp("columns", cols)
+	CalendarGrid.SetProp("max-width", -1)
+	CalendarGrid.SetProp("max-height", -1)
+
+	ThePlan = make(PlannerTable, 0, 1000)
+
+	ThePlan.LoadDefault()
+
+	goals := ThePlan.GetGoals()
 
 	for r := 0; r < rows; r++ {
 
 		for c := 0; c < cols; c++ {
-			cell := calendarGrid.AddNewChild(gi.KiT_Frame, fmt.Sprintf("cell_%v_%v", r, c)).(*gi.Frame)
+			cell := CalendarGrid.AddNewChild(gi.KiT_Frame, fmt.Sprintf("cell_%v_%v", r, c)).(*gi.Frame)
 			cell.SetProp("background-color", "white")
 
 			cell.SetProp("border-color", "black")
@@ -245,62 +369,33 @@ func mainrun() {
 				cell.SetProp("background-color", "lightgreen")
 				if c == 0 {
 					cell.SetProp("background-color", "black")
+				} else {
+					text.Text = Days[c]
 				}
-				if c == 1 {
-					text.Text = "Sunday"
-				} else if c == 2 {
-					text.Text = "Monday"
-				} else if c == 3 {
-					text.Text = "Tuesday"
-				} else if c == 4 {
-					text.Text = "Wednesday"
-				} else if c == 5 {
-					text.Text = "Thursday"
-				} else if c == 6 {
-					text.Text = "Friday"
-				} else if c == 7 {
-					text.Text = "Saturday"
-				}
+
 			} else if c == 0 {
-				text := cell.AddNewChild(gi.KiT_Label, fmt.Sprintf("cell_%v_%v", r, c)).(*gi.Label)
+				text := cell.AddNewChild(gi.KiT_Label, fmt.Sprintf("text_%v_%v", r, c)).(*gi.Label)
 				cell.SetProp("background-color", "lightgreen")
-				if r == 1 {
-					text.Text = "All Day"
-				} else if r == 2 {
-					text.Text = "7 AM"
-				} else if r == 3 {
-					text.Text = "8 AM"
-				} else if r == 4 {
-					text.Text = "9 AM"
-				} else if r == 5 {
-					text.Text = "10 AM"
-				} else if r == 6 {
-					text.Text = "11 AM"
-				} else if r == 7 {
-					text.Text = "12 PM"
-				} else if r == 8 {
-					text.Text = "1 PM"
-				} else if r == 9 {
-					text.Text = "2 PM"
-				} else if r == 10 {
-					text.Text = "3 PM"
-				} else if r == 11 {
-					text.Text = "4 PM"
-				} else if r == 12 {
-					text.Text = "5 PM"
-				} else if r == 13 {
-					text.Text = "6 PM"
-				} else if r == 14 {
-					text.Text = "7 PM"
-				} else if r == 15 {
-					text.Text = "8 PM"
-				}
+				text.Text = Times[r]
+			} else {
+				combo := cell.AddNewChild(gi.KiT_ComboBox, fmt.Sprintf("combo_%v_%v", r, c)).(*gi.ComboBox)
+				combo.ItemsFromStringList(goals, true, 0)
+				combo.ComboSig.Connect(vp.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+					goal := data.(string)
+					cb := send.(*gi.ComboBox)
+					// fmt.Printf("%v \n")
+					var row, col int
+					fmt.Sscanf(cb.Nm, "combo_%v_%v", &row, &col)
+					ThePlan.SetGoalTime(goal, Days[row], Times[col])
+				})
 
 			}
 
 		}
 
 	}
+
+	ThePlan.UpdateCalendar(CalendarGrid)
 
 	tv := split.AddNewChild(giv.KiT_TableView, "tv").(*giv.TableView)
 	// tv.SetProp("height", "20em")
@@ -309,8 +404,6 @@ func mainrun() {
 	sv.Viewport = vp
 	// split0.SetSplits(.5, .5)
 	split.SetSplits(.5, .5)
-
-	ThePlan = make(PlannerTable, 0, 1000)
 
 	tv.SetSlice(&ThePlan, nil)
 
@@ -322,6 +415,12 @@ func mainrun() {
 				sv.SetStruct(rec, nil)
 			}
 		}
+	})
+
+	tv.ViewSig.Connect(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		fmt.Printf("Saving \n")
+		ThePlan.SaveDefault()
+		ThePlan.UpdateCalendar(CalendarGrid)
 	})
 
 	// motivationText := trow.AddNewChild(gi.KiT_Label, "motivationText").(*gi.Label)
