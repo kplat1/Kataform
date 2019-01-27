@@ -115,6 +115,7 @@ func (pr *PlannerTable) SetGoalTime(goal, day, time string) {
 }
 
 func (pr *PlannerTable) UpdateCalendar(cal *gi.Layout) {
+	updt := cal.UpdateStart()
 	// fmt.Printf("Goal: %v Day: %v Time: %v \n", goal, day, time)
 	pr.ClearCalendar(CalendarGrid)
 	for r := range *pr {
@@ -126,17 +127,23 @@ func (pr *PlannerTable) UpdateCalendar(cal *gi.Layout) {
 			frame := cal.KnownChild(index).(*gi.Frame)
 			cb := frame.KnownChild(0).(*gi.ComboBox)
 			cb.SetCurVal(rec.Goal)
+
 		}
 	}
+	cal.UpdateEnd(updt)
 }
 
 func (pr *PlannerTable) ClearCalendar(cal *gi.Layout) {
-	for row := 1; row < len(Times); row++ {
-		for col := 1; col < len(Days); col++ {
+	goals := pr.GetGoals()
+	for row := 1; row < len(Times)+1; row++ {
+		for col := 1; col < len(Days)+1; col++ {
 			index := (8 * row) + col
 			frame := cal.KnownChild(index).(*gi.Frame)
 			cb := frame.KnownChild(0).(*gi.ComboBox)
+
+			cb.ItemsFromStringList(goals, true, 0)
 			cb.SetCurVal(SelectGoalStr)
+
 		}
 	}
 }
@@ -350,7 +357,7 @@ func mainrun() {
 
 	ThePlan.LoadDefault()
 
-	goals := ThePlan.GetGoals()
+	// goals := ThePlan.GetGoals()
 
 	for r := 0; r < rows; r++ {
 
@@ -379,7 +386,7 @@ func mainrun() {
 				text.Text = Times[r]
 			} else {
 				combo := cell.AddNewChild(gi.KiT_ComboBox, fmt.Sprintf("combo_%v_%v", r, c)).(*gi.ComboBox)
-				combo.ItemsFromStringList(goals, true, 0)
+
 				combo.ComboSig.Connect(vp.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					goal := data.(string)
 					cb := send.(*gi.ComboBox)
