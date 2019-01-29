@@ -121,12 +121,17 @@ func (pr *PlannerTable) UpdateCalendar(cal *gi.Layout) {
 	for r := range *pr {
 		rec := (*pr)[r]
 		for _, dt := range rec.DayTimes {
+			if dt.Day == "" || dt.Time == "" {
+				continue
+			}
 			row := TimeToRow[dt.Time]
 			col := DayToCol[dt.Day]
 			index := (8 * row) + col
 			frame := cal.KnownChild(index).(*gi.Frame)
 			cb := frame.KnownChild(0).(*gi.ComboBox)
 			cb.SetCurVal(rec.Goal)
+
+			fmt.Printf("EVERYTHING: Dt: %v Row: %v Column: %v Index: %v \n", dt, row, col, index)
 
 		}
 	}
@@ -393,7 +398,7 @@ func mainrun() {
 					// fmt.Printf("%v \n")
 					var row, col int
 					fmt.Sscanf(cb.Nm, "combo_%v_%v", &row, &col)
-					ThePlan.SetGoalTime(goal, Days[row], Times[col])
+					ThePlan.SetGoalTime(goal, Days[col], Times[row])
 				})
 
 			}
