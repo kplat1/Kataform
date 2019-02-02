@@ -187,7 +187,7 @@ var CalendarGrid *gi.Layout
 
 var ThePlan PlannerTable
 
-var SelectGoalStr = "Select a goal"
+var SelectGoalStr = "?"
 
 var Times = map[int]string{
 	1:  "All Day",

@@ -10,101 +10,12 @@
     "Completion": true,
     "SpellCorrect": true,
     "AutoIndent": true,
-    "EmacsUndo": false
+    "EmacsUndo": false,
+    "DepthColor": true
   },
   "SplitName": "Small",
   "MainLang": "Go",
   "VersCtrl": "Git",
-  "ChangeLog": [
-    {
-      "Date": "2018-11-18T14:05:01.982226603-07:00",
-      "CommitID": "",
-      "Author": "",
-      "Email": "",
-      "Message": "Added fireworks",
-      "Files": ""
-    },
-    {
-      "Date": "2018-11-18T14:04:40.155390876-07:00",
-      "CommitID": "",
-      "Author": "",
-      "Email": "",
-      "Message": "Added fireworks",
-      "Files": ""
-    },
-    {
-      "Date": "2018-11-12T11:57:07.174889694-07:00",
-      "CommitID": "",
-      "Author": "",
-      "Email": "",
-      "Message": "Updated to gi move",
-      "Files": ""
-    },
-    {
-      "Date": "2018-11-06T20:03:36.064615781-07:00",
-      "CommitID": "",
-      "Author": "",
-      "Email": "",
-      "Message": "Added domains json",
-      "Files": ""
-    },
-    {
-      "Date": "2018-11-06T19:51:00.936219907-07:00",
-      "CommitID": "",
-      "Author": "",
-      "Email": "",
-      "Message": "Added mostly fixing the marble leaks",
-      "Files": ""
-    },
-    {
-      "Date": "2018-11-03T10:21:27.740459385-06:00",
-      "CommitID": "",
-      "Author": "",
-      "Email": "",
-      "Message": "Added multiple line editing so you can edit and remove lines you have created",
-      "Files": ""
-    },
-    {
-      "Date": "2018-11-02T20:56:29.695649924-06:00",
-      "CommitID": "",
-      "Author": "",
-      "Email": "",
-      "Message": "Added passing through marbles fixed and reset marbles button",
-      "Files": ""
-    },
-    {
-      "Date": "2018-11-02T18:06:31.078013919-06:00",
-      "CommitID": "",
-      "Author": "",
-      "Email": "",
-      "Message": "Added Gravity -- Still not working",
-      "Files": ""
-    },
-    {
-      "Date": "2018-10-31T17:06:49.89836445-06:00",
-      "CommitID": "",
-      "Author": "",
-      "Email": "",
-      "Message": "Added angles working",
-      "Files": ""
-    },
-    {
-      "Date": "2018-10-30T20:48:29.238685719-06:00",
-      "CommitID": "",
-      "Author": "",
-      "Email": "",
-      "Message": "Added angles - still not working well with bouncing.",
-      "Files": ""
-    },
-    {
-      "Date": "2018-10-30T19:43:01.499885191-06:00",
-      "CommitID": "",
-      "Author": "",
-      "Email": "",
-      "Message": "Added basic marbles",
-      "Files": ""
-    }
-  ],
   "ProjFilename": "/home/koreilly5297/go/src/github.com/kplat1/Kataform/Graph/Graph.gide",
   "ProjRoot": "/home/chrx/go/src/github.com/kplat1/Kataform/Graph",
   "BuildCmds": [
@@ -130,6 +41,9 @@
     ]
   },
   "Spell": {},
+  "Symbols": {
+    "Scope": "SymScopeFile"
+  },
   "OpenDirs": null,
   "Register": "",
   "Splits": [
