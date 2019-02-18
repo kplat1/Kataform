@@ -313,13 +313,13 @@ func mainrun() {
 					if sig == int64(gi.ButtonClicked) { // note: 3 diff ButtonSig sig's possible -- important to check
 						rec := &EventRec{}
 						giv.StructViewDialog(vp, rec, giv.DlgOpts{Title: "Transaction", Prompt: "Enter Transaction Info", Ok: true, Cancel: true}, recv, func(recv, send ki.Ki, sig int64, data interface{}) {
-								if sig == int64(gi.DialogAccepted) {
-									TheEvent = append(TheEvent, rec)
-									TheEvent.SaveDefault()
-									
-									// add allowance updater
-								}
-							})
+							if sig == int64(gi.DialogAccepted) {
+								TheEvent = append(TheEvent, rec)
+								TheEvent.SaveDefault()
+
+								// add allowance updater
+							}
+						})
 
 					}
 				})
