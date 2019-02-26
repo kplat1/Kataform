@@ -98,6 +98,7 @@ func mainrun() {
 	// trow.AddNewChild(gi.KiT_Space, "spc1")
 
 	tv := mfr.AddNewChild(gi.KiT_TabView, "tv").(*gi.TabView)
+	tv.NewTabButton = true
 
 	homeBaseTabT, _ := tv.AddNewTab(gi.KiT_Layout, "Home Base")
 
